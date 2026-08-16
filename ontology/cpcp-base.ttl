@@ -1,0 +1,137 @@
+@prefix cpcp: <https://w3id.org/laquereric/cpcp/ns#> .
+@prefix jrl:  <https://w3id.org/laquereric/json-rpc-ld/ns#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+<https://w3id.org/laquereric/cpcp/ontology/base/1.0.0>
+  a owl:Ontology ;
+  owl:versionIRI <https://w3id.org/laquereric/cpcp/ontology/base/1.0.0> ;
+  owl:versionInfo "1.0.0" ;
+  owl:imports <https://w3id.org/laquereric/json-rpc-ld/ontology/core/1.0.0> ;
+  rdfs:label "CPCP base ontology"@en ;
+  rdfs:comment "Cyborg Pod Contract Package (PubSubStandard_1) foundation: CID, PULL/PUSH operations, ledgers, canonical records, and pods. Imports JSON-RPC-LD core; PS1-PX profiles import this."@en ;
+  rdfs:seeAlso <https://github.com/laquereric/cyborg-pod-contract-package> .
+
+# ---- Classes -----------------------------------------------------------------
+cpcp:Envelope a owl:Class ; rdfs:subClassOf jrl:Envelope ;
+  rdfs:label "CPCP envelope"@en ;
+  rdfs:comment "A JSON-RPC-LD envelope carrying a CPCP record payload."@en ;
+  rdfs:isDefinedBy <https://w3id.org/laquereric/cpcp/ontology/base/1.0.0> .
+
+cpcp:Operation a owl:Class ; rdfs:subClassOf jrl:Operation ;
+  rdfs:label "CPCP operation"@en ;
+  rdfs:comment "A CID-declared operation with an allowed direction (PULL or PUSH)."@en ;
+  rdfs:isDefinedBy <https://w3id.org/laquereric/cpcp/ontology/base/1.0.0> .
+
+cpcp:CID a owl:Class ;
+  rdfs:label "Cyborg Interface Descriptor"@en ;
+  rdfs:comment "The release-controlled grounding contract (JSON-LD context + operation manifest + closed shapes) from which the OKF bundle, ontology, shapes, and language bindings are all generated."@en ;
+  rdfs:isDefinedBy <https://w3id.org/laquereric/cpcp/ontology/base/1.0.0> .
+
+cpcp:Profile a owl:Class ;
+  rdfs:label "CPCP profile"@en ;
+  rdfs:comment "A concrete contract package (e.g. PS1-P1) that has exactly one CID."@en ;
+  rdfs:isDefinedBy <https://w3id.org/laquereric/cpcp/ontology/base/1.0.0> .
+
+cpcp:Pod a owl:Class ;
+  rdfs:label "pod"@en ;
+  rdfs:comment "A deployable FRONT/BACK unit that serves a CPCP profile's operations."@en ;
+  rdfs:isDefinedBy <https://w3id.org/laquereric/cpcp/ontology/base/1.0.0> .
+
+cpcp:Direction a owl:Class ;
+  rdfs:label "operation direction"@en ;
+  rdfs:comment "The permitted data-flow direction of an operation: PULL (FRONT<-BACK) or PUSH (BACK<-FRONT)."@en ;
+  rdfs:isDefinedBy <https://w3id.org/laquereric/cpcp/ontology/base/1.0.0> .
+
+cpcp:Ledger a owl:Class ;
+  rdfs:label "ledger"@en ;
+  rdfs:comment "An append-only store a record is placed in."@en ;
+  rdfs:isDefinedBy <https://w3id.org/laquereric/cpcp/ontology/base/1.0.0> .
+cpcp:CanonicalLedger a owl:Class ; rdfs:subClassOf cpcp:Ledger ;
+  rdfs:label "canonical ledger"@en ;
+  rdfs:comment "The portable, shared source of truth."@en ;
+  rdfs:isDefinedBy <https://w3id.org/laquereric/cpcp/ontology/base/1.0.0> .
+cpcp:SyncIntentLedger a owl:Class ; rdfs:subClassOf cpcp:Ledger ;
+  rdfs:label "sync-intent ledger"@en ;
+  rdfs:comment "Pending intended mutations awaiting reconciliation."@en ;
+  rdfs:isDefinedBy <https://w3id.org/laquereric/cpcp/ontology/base/1.0.0> .
+cpcp:PrivateLocalLedger a owl:Class ; rdfs:subClassOf cpcp:Ledger ;
+  rdfs:label "private-local ledger"@en ;
+  rdfs:comment "Non-portable, device-local records that MUST NOT cross a portable PULL/PUSH boundary."@en ;
+  rdfs:isDefinedBy <https://w3id.org/laquereric/cpcp/ontology/base/1.0.0> .
+
+cpcp:Record a owl:Class ;
+  rdfs:label "record"@en ;
+  rdfs:comment "A typed payload carried by an envelope and placed in a ledger."@en ;
+  rdfs:isDefinedBy <https://w3id.org/laquereric/cpcp/ontology/base/1.0.0> .
+cpcp:CanonicalRecord a owl:Class ; rdfs:subClassOf cpcp:Record ;
+  rdfs:label "canonical record"@en ;
+  rdfs:comment "A portable record destined for the canonical ledger."@en ;
+  rdfs:isDefinedBy <https://w3id.org/laquereric/cpcp/ontology/base/1.0.0> .
+cpcp:Note a owl:Class ; rdfs:subClassOf cpcp:CanonicalRecord ;
+  rdfs:label "note"@en ; rdfs:comment "A portable canonical record containing a note."@en ;
+  rdfs:isDefinedBy <https://w3id.org/laquereric/cpcp/ontology/base/1.0.0> .
+cpcp:Insight a owl:Class ; rdfs:subClassOf cpcp:CanonicalRecord ;
+  rdfs:label "insight"@en ; rdfs:comment "A portable canonical record containing an insight."@en ;
+  rdfs:isDefinedBy <https://w3id.org/laquereric/cpcp/ontology/base/1.0.0> .
+cpcp:Receipt a owl:Class ; rdfs:subClassOf cpcp:CanonicalRecord ;
+  rdfs:label "receipt"@en ; rdfs:comment "Evidence of a protocol action or attested result."@en ;
+  rdfs:isDefinedBy <https://w3id.org/laquereric/cpcp/ontology/base/1.0.0> .
+cpcp:SyncIntent a owl:Class ; rdfs:subClassOf cpcp:Record ;
+  rdfs:label "sync intent"@en ; rdfs:comment "A pending intended mutation destined for the sync-intent ledger."@en ;
+  rdfs:isDefinedBy <https://w3id.org/laquereric/cpcp/ontology/base/1.0.0> .
+cpcp:PrivateLocalArtifact a owl:Class ; rdfs:subClassOf cpcp:Record ;
+  rdfs:label "private-local artifact"@en ; rdfs:comment "A non-portable device-local record; never crosses a portable boundary."@en ;
+  rdfs:isDefinedBy <https://w3id.org/laquereric/cpcp/ontology/base/1.0.0> .
+
+# ---- Direction individuals ---------------------------------------------------
+cpcp:PULL a owl:NamedIndividual, cpcp:Direction ;
+  rdfs:label "PULL"@en ; rdfs:comment "FRONT reads canonical state from BACK."@en ;
+  rdfs:isDefinedBy <https://w3id.org/laquereric/cpcp/ontology/base/1.0.0> .
+cpcp:PUSH a owl:NamedIndividual, cpcp:Direction ;
+  rdfs:label "PUSH"@en ; rdfs:comment "FRONT publishes a permitted record to BACK."@en ;
+  rdfs:isDefinedBy <https://w3id.org/laquereric/cpcp/ontology/base/1.0.0> .
+
+# ---- Object properties -------------------------------------------------------
+cpcp:declaresOperation a owl:ObjectProperty ;
+  rdfs:domain cpcp:CID ; rdfs:range cpcp:Operation ;
+  rdfs:label "declares operation"@en ;
+  rdfs:isDefinedBy <https://w3id.org/laquereric/cpcp/ontology/base/1.0.0> .
+cpcp:hasCID a owl:ObjectProperty ;
+  rdfs:domain cpcp:Profile ; rdfs:range cpcp:CID ;
+  rdfs:label "has CID"@en ;
+  rdfs:isDefinedBy <https://w3id.org/laquereric/cpcp/ontology/base/1.0.0> .
+cpcp:invokesOperation a owl:ObjectProperty ; rdfs:subPropertyOf jrl:invokesOperation ;
+  rdfs:domain cpcp:Envelope ; rdfs:range cpcp:Operation ;
+  rdfs:label "invokes operation"@en ;
+  rdfs:isDefinedBy <https://w3id.org/laquereric/cpcp/ontology/base/1.0.0> .
+cpcp:hasPayload a owl:ObjectProperty ;
+  rdfs:domain cpcp:Envelope ; rdfs:range cpcp:Record ;
+  rdfs:label "has payload"@en ;
+  rdfs:isDefinedBy <https://w3id.org/laquereric/cpcp/ontology/base/1.0.0> .
+cpcp:storedIn a owl:ObjectProperty ;
+  rdfs:domain cpcp:Record ; rdfs:range cpcp:Ledger ;
+  rdfs:label "stored in"@en ;
+  rdfs:isDefinedBy <https://w3id.org/laquereric/cpcp/ontology/base/1.0.0> .
+cpcp:hasDirection a owl:ObjectProperty ;
+  rdfs:domain cpcp:Operation ; rdfs:range cpcp:Direction ;
+  rdfs:label "has direction"@en ;
+  rdfs:isDefinedBy <https://w3id.org/laquereric/cpcp/ontology/base/1.0.0> .
+cpcp:references a owl:ObjectProperty ;
+  rdfs:domain cpcp:Record ; rdfs:range rdfs:Resource ;
+  rdfs:label "references"@en ;
+  rdfs:comment "A record's portable @id reference to another resource."@en ;
+  rdfs:isDefinedBy <https://w3id.org/laquereric/cpcp/ontology/base/1.0.0> .
+
+# ---- Datatype properties -----------------------------------------------------
+cpcp:contentDigest a owl:DatatypeProperty ;
+  rdfs:domain cpcp:CID ; rdfs:range xsd:string ;
+  rdfs:label "content digest"@en ;
+  rdfs:comment "The immutable digest of the CID release artifact."@en ;
+  rdfs:isDefinedBy <https://w3id.org/laquereric/cpcp/ontology/base/1.0.0> .
+cpcp:protocolVersion a owl:DatatypeProperty ;
+  rdfs:range xsd:string ;
+  rdfs:label "protocol version"@en ;
+  rdfs:isDefinedBy <https://w3id.org/laquereric/cpcp/ontology/base/1.0.0> .
