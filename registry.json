@@ -1,0 +1,10 @@
+{
+  "@context": "https://threedot.dev/context/ps1",
+  "standard": "JSON-RPC-LD-PS1",
+  "title": "PubSubStandard_1",
+  "base": "https://github.com/laquereric/osi-level-8",
+  "cpcps": [
+    { "id": "JSON-RPC-LD-PS1-P1", "profile": 1, "name": "Cyborg Channel", "repo": "https://github.com/laquereric/JSON-RPC-LD-PS1-P1" },
+    { "id": "JSON-RPC-LD-PS1-P2", "profile": 2, "name": "Reference-Passing for Agents", "repo": "https://github.com/laquereric/JSON-RPC-LD-PS1-P2" }
+  ]
+}
