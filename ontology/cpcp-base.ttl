@@ -11,7 +11,7 @@
   owl:versionInfo "1.0.0" ;
   owl:imports <https://w3id.org/laquereric/json-rpc-ld/ontology/core/1.0.0> ;
   rdfs:label "CPCP base ontology"@en ;
-  rdfs:comment "Cyborg Pod Contract Package (PubSubStandard_1) foundation: CID, PULL/PUSH operations, ledgers, canonical records, and pods. Imports JSON-RPC-LD core; PS1-PX profiles import this."@en ;
+  rdfs:comment "coordination-protocol-contract-package (PubSubStandard_1) foundation: CID, PULL/PUSH operations, ledgers, canonical records, and pods. Imports JSON-RPC-LD core; PS1-PX profiles import this."@en ;
   rdfs:seeAlso <https://github.com/laquereric/cyborg-pod-contract-package> .
 
 # ---- Classes -----------------------------------------------------------------

@@ -1,5 +1,8 @@
 # CPCP base ontology (Data perspective)
 
+CPCP is **coordination-protocol-contract-package**. The vocabulary IRI and every
+term below are unchanged by that naming: the letters did not move.
+
 `cpcp-base.ttl` is the **PubSubStandard_1 (JSON-RPC-LD-PS1) foundation vocabulary**:
 `CID`, `Profile`, `Operation` (+ `PULL` / `PUSH` directions), the three ledgers
 (`CanonicalLedger`, `SyncIntentLedger`, `PrivateLocalLedger`), records
