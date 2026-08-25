@@ -13,14 +13,6 @@ That sentence is not a slogan. The rules below follow from it: a deterministic
 system that lets a non-deterministic one in must be able to say afterwards
 **what was done and on whose word**.
 
-> **Naming.** This repository was `cyborg-pod-contract-package`, and CPCP has
-> also appeared expanded as *PubSubStandard_1* framing in dependent projects.
-> The settled expansion is **coordination-protocol-contract-package**. The
-> letters do not change — which is why nothing on the wire moves: the vocabulary
-> IRI `https://w3id.org/laquereric/cpcp/ns#`, the `/_cpcp` mount point, the
-> `JSON-RPC-LD-PS1` standard identifier and every `PS1-P{N}` package id are all
-> unaffected. What changed is what the letters mean.
-
 ## The two faces of a grant
 
 - **PULL — read access.** A party reads grounded **Context** across
