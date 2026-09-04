@@ -22,7 +22,12 @@ BASE = "http://localhost:13002/_cpcp"
 
 def pull(base_url, method, params=None):
     """Returns (status, envelope dict). Never raises."""
-    body = {"jsonrpc": "2.0", "id": 1, "method": method, "params": params or {}}
+    if params is None:
+        params = {}
+    if not isinstance(params, dict):
+        return 0, {"ok": False, "reason": "client_params_not_object",
+                   "because": "params must be an object; the server would refuse it"}
+    body = {"jsonrpc": "2.0", "id": 1, "method": method, "params": params}
     req = urllib.request.Request(
         base_url.rstrip("/") + "/rpc",
         data=json.dumps(body).encode(),

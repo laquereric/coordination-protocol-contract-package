@@ -22,7 +22,10 @@ is polled (`projection.latest`), never pushed.
 
 ## Params and result
 
-* `params` is always an object; missing defaults to `{}`.
+* `params` is always an object; missing defaults to `{}`. Clients MUST NOT
+  coerce falsey non-object values to `{}` — validate locally (refuse) and
+  let the server refuse what gets through. Both layers agree: a non-object
+  `params` is `unparseable_json`, never a silent `{}`.
 * Results are plain data (hashes, booleans, strings, numbers, arrays,
   null) so Ruby, Python, and JS consume them identically. No result
   monads, no sentinel values, no out-parameters.

@@ -22,6 +22,11 @@ BASE = "http://localhost:13002/_cpcp"
 
 def push(base_url, method, params=None, operation_id=None):
     """Returns (status, envelope dict). Never raises."""
+    if params is None:
+        params = {}
+    if not isinstance(params, dict):
+        return 0, {"ok": False, "reason": "client_params_not_object",
+                   "because": "params must be an object; the server would refuse it"}
     op = operation_id or ("example-" + uuid.uuid4().hex[:16])
     body = {"jsonrpc": "2.0", "id": 1, "method": method,
             "params": params or {}, "operationId": op}

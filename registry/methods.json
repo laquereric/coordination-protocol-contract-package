@@ -232,6 +232,48 @@
         "unknown_method"
       ],
       "profiles": []
+    },
+    {
+      "operation_iri": "https://w3id.org/cpcp/osi8/demo#note.list",
+      "wire_method": "note.list",
+      "seam": "demo",
+      "producer": "demo stub",
+      "consumers": [
+        "language examples",
+        "demo runner"
+      ],
+      "params": "{}",
+      "result": "{notes[]}",
+      "refusals": [
+        "empty_body",
+        "unparseable_json",
+        "unknown_operation"
+      ],
+      "profiles": [],
+      "native": true,
+      "note": "Demo-seam method, not extracted: the executable reference for PushNote/PullNote CIDs."
+    },
+    {
+      "operation_iri": "https://w3id.org/cpcp/osi8/demo#note.create",
+      "wire_method": "note.create",
+      "seam": "demo",
+      "producer": "demo stub",
+      "consumers": [
+        "language examples",
+        "demo runner"
+      ],
+      "params": "{title, body}",
+      "result": "the created Note (replay on repeated operationId)",
+      "refusals": [
+        "empty_body",
+        "unparseable_json",
+        "unknown_operation",
+        "missing_params",
+        "operation_id_required"
+      ],
+      "profiles": [],
+      "native": true,
+      "note": "Demo-seam method, not extracted: the executable reference for PushNote/PullNote CIDs."
     }
   ]
 }

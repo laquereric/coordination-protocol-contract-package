@@ -3,7 +3,7 @@
 A PUSH names its intent before performing it; asking twice with the
 same name must not perform it twice.
 
-Sources: `gems/rails-cpcp/lib/rails_cpcp/idempotency.rb`, dispatcher.
+Sources: PROVENANCE.json entry E3 (idempotency store, dispatcher rules).
 
 ## Rules
 

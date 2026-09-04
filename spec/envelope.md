@@ -4,9 +4,8 @@ Never raise across the boundary. Every CPCP response is an envelope; every
 failure is data (`ok: false` plus a reason), never an exception, a dropped
 connection, or a bare status.
 
-Sources: `gems/rails-cpcp/lib/rails_cpcp/envelope.rb`,
-`request_body.rb`, `dispatcher.rb`; bus/vault/persist controllers;
-`runtimes/mind-pod/mind/mind_seam.py`.
+Sources: PROVENANCE.json entries E1 (envelope helpers, body parser,
+dispatcher; bus/vault/persist controllers; mind seam).
 
 ## Request
 

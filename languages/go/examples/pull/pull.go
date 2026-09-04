@@ -14,10 +14,14 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
 func pull(baseURL, method string, params map[string]any) (int, map[string]any) {
+	// Trailing slashes must not double the path: every client normalizes
+	// the seam root before appending /rpc.
+	baseURL = strings.TrimRight(baseURL, "/")
 	body, _ := json.Marshal(map[string]any{
 		"jsonrpc": "2.0", "id": 1, "method": method, "params": params,
 	})

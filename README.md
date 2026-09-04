@@ -20,29 +20,35 @@ system that lets a non-deterministic one in must be able to say afterwards
   references. A read costs nothing and promises nothing.
 - **PUSH — write access.** A party writes a typed, closed-shape **Effect**,
   again linked by CID `@id` references. A write carries an `operationId` — the
-  actor's word for what it is doing — and an account.
+  actor's word for what it is doing. Authentication travels out of band
+  (Bearer credentials the deployment issues); it is not a wire field.
 
 One grant, two faces, different obligations. PULL and PUSH are the mechanism;
-read access and write access are what they mean.
+read access and write access are what they mean. Data direction, stated
+once: PULL means FRONT reads from BACK; PUSH means FRONT publishes to
+BACK. (HTTP requests travel caller-to-seam in both cases; the arrows
+above are data flow, not transport.)
 
 ## What a CPCP is
 
 A versioned Git repo that packages one profile as a runnable pod:
 
-- a **CID** (JSON-LD `@context` + operation manifest + closed SHACL shapes);
-- a **FRONT** OCI image and a **BACK** OCI image (build examples);
-- **Python** and **Go** bindings generated from the CID;
-- a demo of CID linkage across JSON-RPC-LD — PULL (FRONT→BACK) and PUSH
-  (BACK→FRONT).
+- a **CID** (JSON-LD `@context` + operation manifest + closed SHACL shapes —
+  see `demo/push-note.cid.json` and `demo/pull-note.cid.json`);
+- **language examples** that push and pull through the seam (`languages/`,
+  eight languages, stdlib only where the language allows);
+- an **executable demo** (`demo/`: stub seam plus a runner driving the
+  examples against it).
 
 The package is the point. A grant that cannot be versioned and deployed is a
-convention, and conventions drift.
+convention, and conventions drift. Pod artifacts (OCI images, generated
+bindings) live in profile repositories when they exist; this repo holds the
+contract, the examples, and the demo — everything here runs or validates.
 
 ## Standing on
 
-CPCP is layered on the OSI Level 8 base protocol
-([json-rpc-ld](https://github.com/laquereric/json-rpc-ld) /
-[osi-level-8](https://github.com/laquereric/osi-level-8)). Base and profiles own
+CPCP is layered on the base protocol
+([json-rpc-ld](https://github.com/laquereric/json-rpc-ld)). Base owns
 the **shapes**; CPCP is the **transport of the grant** and the packaging of it.
 Do not restate the base here — depend on it.
 
@@ -61,15 +67,10 @@ name; `CPCP` names what a package of it is.
 
 ## Registry
 
-See `registry.json`. Current CPCPs:
-
-- **JSON-RPC-LD-PS1-P1** — Profile 1 (the Cyborg Channel): data sync, three ledgers.
-  https://github.com/laquereric/JSON-RPC-LD-PS1-P1
-- **JSON-RPC-LD-PS1-P2** — Profile 2 (reference-passing for agents).
-  https://github.com/laquereric/JSON-RPC-LD-PS1-P2
-
-Profile specs (moved from osi-level-8) live inside their CPCP repos; the
-osi-level-8 repo holds the **Base** and Profile 3 (SwitchYard / market routing).
+See `registry.json`. Profile entries appear here when their repositories
+are public and stable — no dead links are listed. The demo CIDs
+(`demo/push-note.cid.json`, `demo/pull-note.cid.json`) are the runnable
+reference, not registry entries: they live in this tree.
 
 ## Extracted contracts
 
@@ -82,10 +83,37 @@ provenance. One-way extraction; the monorepo follows this repo pinned.
 
 ## Implementations
 
-`languages/` holds runnable clients in Python and Ruby — PULL and PUSH
-examples against any `/_cpcp` endpoint, stdlib only. Read access is
-pull, write access is push; refusals are typed envelopes rather than
-exceptions, and PUSH carries an `operationId`.
+`languages/` holds runnable clients in eight languages — PULL and PUSH
+examples against any `/_cpcp` endpoint:
+
+| Language | Transport | Notes |
+|---|---|---|
+| Python | `urllib`, stdlib only | reference behavior |
+| Ruby | `net/http`, stdlib only | reads bodies on every status |
+| JavaScript | `fetch` | mirrors the reference |
+| TypeScript | erasable syntax, plain `node` runs it | same contract, typed |
+| Go | `net/http`, stdlib only | |
+| Java | `java.net.http`, single-file run | stdlib has no JSON parser: full body prints, `ok` scanned |
+| C | POSIX sockets, no dependencies | minimal HTTP/JSON; plain `http://` only |
+| C++ | POSIX sockets, `std::string` | same limits as C |
+
+Read access is pull, write access is push; refusals are typed envelopes
+rather than exceptions, and PUSH carries an `operationId`.
+
+## Namespaces
+
+Three roots, each authoritative for its layer — terms, operations, and
+message envelopes are separate concerns, never one vocabulary:
+
+| Root | Owns | Example |
+|---|---|---|
+| `https://w3id.org/laquereric/cpcp/ns#` | payload terms (`@vocab`) | `cpcp:Note` |
+| `https://w3id.org/cpcp/osi8/...` | operation identity | `.../persist#path.set` |
+| JSON-RPC-LD (`json-rpc-ld` repo) | message structure, `@context` mechanics, SHACL validation | `jsonrpc`, `id`, `@context` |
+
+W3C/RDF core namespaces (`rdf:`, `rdfs:`, `owl:`, `xsd:`) are
+foundational identifiers, not dependencies. No other external namespace
+appears in this tree.
 
 ## Ontology
 
