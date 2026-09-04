@@ -51,12 +51,17 @@ Every CPCP package repo follows the canonical layout. Machine readers
 start at `.cpcp/package.json`; humans start at `README.md`.
 
 ```text
-.cpcp/package.json   machine manifest: kind, version, contract rev,
-                     CIDs, seam routes, runners, languages
-demo/                CIDs (*.cid.json), stub seam (server), matrix
-                     runner, shape check, canonical shapes
-languages/<lang>/    README plus examples/{push,pull} clients
+.cpcp/package.json            index: kind, version, contract rev, registry
+                              by SHA, unscoped seams, gates
+.cpcp/<scope>/package.json    one per scope the repo SERVES: its definition,
+                              seams, measured exposure, invariants
+demo/                         CIDs (*.cid.json), stub seam (server), matrix
+                              runner, shape check, canonical shapes
+languages/<lang>/             README plus examples/{push,pull} clients
 ```
+
+Full rules, field tables and a worked example: [repo format](spec/repo-format.md).
+A repo that serves no seam carries the index alone.
 
 This repo (the contract home) carries `spec/`, `ontology/`,
 and `PROVENANCE.json` instead of a demo of its own: the demo lives in

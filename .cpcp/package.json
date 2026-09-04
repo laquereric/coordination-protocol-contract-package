@@ -4,17 +4,18 @@
   "name": "coordination-protocol-contract-package",
   "description": "The CPCP contract home: envelopes, refusal taxonomy, idempotency, method conventions, layer authority, operation identity and scopes, plus the base OWL ontology.",
   "self_rev": "434ef84",
-  "note": "The contract home carries spec/ and ontology/ instead of a demo of its own. It declares no seam and serves no route: nothing here is reachable at any scope.",
+  "note": "The contract home carries spec/ and ontology/ instead of a demo of its own. It declares no seam and serves no route: nothing here is reachable at any scope. The layout every CPCP package repo follows, including the per-scope manifests, is specified in spec/repo-format.md; this repo serves no seam and therefore carries the index alone.",
   "spec": {
+    "background": "spec/background.md",
     "envelope": "spec/envelope.md",
-    "refusals": "spec/refusals.md",
+    "http-mapping": "spec/http-mapping.md",
     "idempotency": "spec/idempotency.md",
-    "methods": "spec/methods.md",
     "identity": "spec/identity.md",
     "layers": "spec/layers.md",
-    "scopes": "spec/scopes.md",
-    "http-mapping": "spec/http-mapping.md",
-    "background": "spec/background.md"
+    "methods": "spec/methods.md",
+    "refusals": "spec/refusals.md",
+    "repo-format": "spec/repo-format.md",
+    "scopes": "spec/scopes.md"
   },
   "ontology": {
     "file": "ontology/cpcp-base.ttl",
