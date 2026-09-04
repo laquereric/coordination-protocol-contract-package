@@ -82,10 +82,10 @@ provenance. One-way extraction; the monorepo follows this repo pinned.
 
 ## Implementations
 
-- **rails-cpcp** — a mountable Rails engine that projects Rails resources as a
-  CPCP surface at `/_cpcp`. Read access is `direction: :pull`, write access is
-  `direction: :push`; refusals are typed envelopes rather than exceptions, and
-  PUSH requires an `operationId`.
+`languages/` holds runnable clients in Python and Ruby — PULL and PUSH
+examples against any `/_cpcp` endpoint, stdlib only. Read access is
+pull, write access is push; refusals are typed envelopes rather than
+exceptions, and PUSH carries an `operationId`.
 
 ## Ontology
 

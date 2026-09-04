@@ -48,7 +48,7 @@ collapse into `unknown_operation`.
 Collections return `result: {"@graph": [...]}`. `@context` carries the
 `@vocab` plus `id`/`type`/`operationId` mappings on LD-profile methods.
 
-## Refusal: Rails nested form
+## Refusal: nested form
 
 ```json
 {
@@ -75,8 +75,8 @@ top-level `reason` that is not there.
 }
 ```
 
-Both shapes are stable and gated; they are not unified (flattening the
-Rails envelope would break its consumers). A client MUST handle both
+Both shapes are stable; they are not unified (flattening the nested
+envelope would break its consumers). A client MUST handle both
 locations. See `spec/refusals.md` for the reason taxonomy and
 `spec/http-mapping.md` for which HTTP status each class arrives with.
 
