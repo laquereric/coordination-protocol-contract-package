@@ -71,6 +71,15 @@ See `registry.json`. Current CPCPs:
 Profile specs (moved from osi-level-8) live inside their CPCP repos; the
 osi-level-8 repo holds the **Base** and Profile 3 (SwitchYard / market routing).
 
+## Extracted contracts
+
+`spec/` holds the wire formats and protocol rules extracted from the
+magentic-stack pod that runs this contract in production: envelopes,
+HTTP mapping, idempotency, refusal taxonomy, method conventions, layer
+authority, operation identity, plus background positioning.
+`registry/` holds the extracted method and seam registries with
+provenance. One-way extraction; the monorepo follows this repo pinned.
+
 ## Implementations
 
 - **rails-cpcp** — a mountable Rails engine that projects Rails resources as a
