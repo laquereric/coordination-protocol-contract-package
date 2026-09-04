@@ -1,5 +1,5 @@
 @prefix cpcp: <https://w3id.org/cpcp/ns#> .
-@prefix jrl:  <https://w3id.org/laquereric/json-rpc-ld/ns#> .
+@prefix jrl:  <https://w3id.org/json-rpc-ld/ns#> .
 @prefix owl:  <http://www.w3.org/2002/07/owl#> .
 @prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
@@ -9,7 +9,7 @@
   a owl:Ontology ;
   owl:versionIRI <https://w3id.org/cpcp/ontology/base/1.0.0> ;
   owl:versionInfo "1.0.0" ;
-  owl:imports <https://w3id.org/laquereric/json-rpc-ld/ontology/core/1.0.0> ;
+  owl:imports <https://w3id.org/json-rpc-ld/ontology/core/1.0.0> ;
   rdfs:label "CPCP base ontology"@en ;
   rdfs:comment "coordination-protocol-contract-package (PubSubStandard_1) foundation: CID, PULL/PUSH operations, ledgers, canonical records, and pods. Imports JSON-RPC-LD core; PS1-PX profiles import this."@en ;
   rdfs:seeAlso <https://github.com/laquereric/coordination-protocol-contract-package> .
