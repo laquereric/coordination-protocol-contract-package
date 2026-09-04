@@ -39,7 +39,7 @@ end
 if $PROGRAM_NAME == __FILE__
   base = ENV.fetch("CPCP_URL", BASE)
   method = ARGV[0] || "note.create"
-  params = ARGV[1] ? JSON.parse(ARGV[1]) : { "title" => "hello from cpcp" }
+  params = ARGV[1] ? JSON.parse(ARGV[1]) : { "title" => "hello from cpcp", "body" => "posted by the CPCP push example" }
   status, env = push(base, method, params, ARGV[2])
   puts JSON.pretty_generate("status" => status, "envelope" => env)
   exit(env["ok"] == true ? 0 : 1)

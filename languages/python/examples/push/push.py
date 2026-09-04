@@ -7,7 +7,7 @@ CPCP_URL at your own pod.
 
 Usage:
     CPCP_URL=http://localhost:13002/_cpcp python3 push.py [method] [params-json] [operation-id]
-    Defaults: note.create {"title": "hello from cpcp"} with a random operationId.
+    Defaults: note.create {"title": "hello from cpcp", "body": "posted by the CPCP push example"} with a random operationId.
 """
 from __future__ import annotations
 
@@ -47,7 +47,7 @@ def main(argv):
     base = os.environ.get("CPCP_URL", BASE)
     method = argv[1] if len(argv) > 1 else "note.create"
     try:
-        params = json.loads(argv[2]) if len(argv) > 2 else {"title": "hello from cpcp"}
+        params = json.loads(argv[2]) if len(argv) > 2 else {"title": "hello from cpcp", "body": "posted by the CPCP push example"}
     except ValueError:
         print("params must be JSON", file=sys.stderr)
         return 2
