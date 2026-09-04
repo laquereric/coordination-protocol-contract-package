@@ -87,7 +87,7 @@ reference, not registry entries anywhere.
 `spec/` holds the wire formats and protocol rules extracted from the
 magentic-stack pod that runs this contract in production: envelopes,
 HTTP mapping, idempotency, refusal taxonomy, method conventions, layer
-authority, operation identity, plus background positioning.
+authority, operation identity, scopes, plus background positioning.
 One-way extraction; the monorepo follows this repo pinned.
 
 ## Implementations
