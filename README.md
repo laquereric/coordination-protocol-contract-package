@@ -117,7 +117,7 @@ message envelopes are separate concerns, never one vocabulary:
 
 | Root | Owns | Example |
 |---|---|---|
-| `https://w3id.org/laquereric/cpcp/ns#` | payload terms (`@vocab`) | `cpcp:Note` |
+| `https://w3id.org/cpcp/ns#` | payload terms (`@vocab`) | `cpcp:Note` |
 | `https://w3id.org/cpcp/osi8/...` | operation identity | `.../persist#path.set` |
 | JSON-RPC-LD (`json-rpc-ld` repo) | message structure, `@context` mechanics, SHACL validation | `jsonrpc`, `id`, `@context` |
 

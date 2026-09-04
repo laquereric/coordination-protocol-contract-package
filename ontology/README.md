@@ -9,8 +9,8 @@ term below are unchanged by that naming: the letters did not move.
 (`CanonicalRecord` → `Note` / `Insight` / `Receipt`, plus `SyncIntent`,
 `PrivateLocalArtifact`), and `Pod`.
 
-- **Ontology IRI:** `https://w3id.org/laquereric/cpcp/ontology/base/1.0.0`
-- **Term namespace:** `https://w3id.org/laquereric/cpcp/ns#` (`cpcp:`)
+- **Ontology IRI:** `https://w3id.org/cpcp/ontology/base/1.0.0`
+- **Term namespace:** `https://w3id.org/cpcp/ns#` (`cpcp:`)
 - **Imports:** `json-rpc-ld` core (`.../json-rpc-ld/ontology/core/1.0.0`)
 
 Import graph: `PS1-PX` profile repos → **CPCP base** → **JSON-RPC-LD core**,

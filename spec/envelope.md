@@ -37,7 +37,7 @@ collapse into `unknown_operation`.
 ```json
 {
   "jsonrpc": "2.0",
-  "@context": {"@vocab": "https://w3id.org/laquereric/cpcp/ns#", "id": "@id", "type": "@type"},
+  "@context": {"@vocab": "https://w3id.org/cpcp/ns#", "id": "@id", "type": "@type"},
   "id": 1,
   "ok": true,
   "result": { "...": "..." }
