@@ -13,6 +13,31 @@ That sentence is not a slogan. The rules below follow from it: a deterministic
 system that lets a non-deterministic one in must be able to say afterwards
 **what was done and on whose word**.
 
+## CPCP is not authentication and not authorization
+
+CPCP is a **semantic data compatibility and effect guardrail** system. It answers
+whether a message means what its contract says it means, whether the effect it
+asks for is one the seam admits, and whether what happened can be read back
+afterwards. It runs **alongside** conventional authentication and authorization,
+not instead of them, and it replaces neither.
+
+**None of the CPCP machinery comes into play until those systems have granted
+permission to perform the actions described in a CPCP `package.json`.** Identity
+is established first, and the right to perform the operation is granted first.
+Only then does CPCP ask its own questions: is this payload the shape the contract
+declares, does this PUSH name its intent, does the response carry what the
+operation promised, and is there a journal entry saying it happened. A caller who
+has not been authenticated and authorized never reaches a shape check, because
+there is nothing here that would stop them.
+
+The division is worth stating plainly because a guardrail is easy to mistake for
+a gate. A shape refusing a malformed Effect is not an access decision. A closed
+vocabulary is not a permission. An `operationId` makes a retry the same write
+rather than a second one; it does not say who may write. Read the other way, a
+system that treated a conforming payload as an authorized one would have
+misplaced its security boundary — CPCP would be answering a question it was never
+given the evidence to answer.
+
 ## The two faces of a grant
 
 - **PULL — read access.** A party reads grounded **Context** across
