@@ -30,10 +30,11 @@ the normative payload contracts, and they live in exactly two places:
 * **Production profile CIDs** live in their profile repositories
   (closed, versioned) — not in this repo; duplicating them here would
   drift at two rates.
-* **Standalone/reference CIDs** (`demo/push-note.cid.json`,
+* **Standalone/reference CIDs** (in
+  [cpcp_demo](https://github.com/laquereric/cpcp_demo): `demo/push-note.cid.json`,
   `demo/pull-note.cid.json`) carry their shapes inline **because there
   is no profile repository for the demo** — and the single canonical
-  copy is `demo/shapes/note-shape.ttl` (versioned, digested in
+  copy is `demo/shapes/note-shape.ttl` there (versioned, digested in
   `demo/SHAPES.json`), which `demo/check-shapes.py` enforces on every
   demo run. Inline here means portable, not second-sourced.
 

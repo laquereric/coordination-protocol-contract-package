@@ -33,17 +33,34 @@ above are data flow, not transport.)
 
 A versioned Git repo that packages one profile as a runnable pod:
 
-- a **CID** (JSON-LD `@context` + operation manifest + closed SHACL shapes —
-  see `demo/push-note.cid.json` and `demo/pull-note.cid.json`);
-- **language examples** that push and pull through the seam (`languages/`,
-  eight languages, stdlib only where the language allows);
-- an **executable demo** (`demo/`: stub seam plus a runner driving the
-  examples against it).
+- a **CID** (JSON-LD `@context` + operation manifest + closed SHACL shapes);
+- **language examples** that push and pull through the seam;
+- an **executable demo** (stub seam plus a runner driving the examples).
 
 The package is the point. A grant that cannot be versioned and deployed is a
 convention, and conventions drift. Pod artifacts (OCI images, generated
 bindings) live in profile repositories when they exist; this repo holds the
-contract, the examples, and the demo — everything here runs or validates.
+contract. The reference demo — PushNote/PullNote CIDs, stub seam, and
+push/pull clients in eight languages — lives next door, in its own repo:
+
+**[cpcp_demo](https://github.com/laquereric/cpcp_demo)**
+
+## Repo format
+
+Every CPCP package repo follows the canonical layout. Machine readers
+start at `.cpcp/package.json`; humans start at `README.md`.
+
+```text
+.cpcp/package.json   machine manifest: kind, version, contract rev,
+                     CIDs, seam routes, runners, languages
+demo/                CIDs (*.cid.json), stub seam (server), matrix
+                     runner, shape check, canonical shapes
+languages/<lang>/    README plus examples/{push,pull} clients
+```
+
+This repo (the contract home) carries `spec/`, `registry/`, `ontology/`,
+and `PROVENANCE.json` instead of a demo of its own: the demo lives in
+`cpcp_demo` so the contract never depends on example code.
 
 ## Standing on
 
@@ -68,9 +85,9 @@ name; `CPCP` names what a package of it is.
 ## Registry
 
 See `registry.json`. Profile entries appear here when their repositories
-are public and stable — no dead links are listed. The demo CIDs
-(`demo/push-note.cid.json`, `demo/pull-note.cid.json`) are the runnable
-reference, not registry entries: they live in this tree.
+are public and stable — no dead links are listed. The demo CIDs live in
+[cpcp_demo](https://github.com/laquereric/cpcp_demo) and are the runnable
+reference, not registry entries here.
 
 ## Extracted contracts
 
@@ -83,8 +100,9 @@ provenance. One-way extraction; the monorepo follows this repo pinned.
 
 ## Implementations
 
-`languages/` holds runnable clients in eight languages — PULL and PUSH
-examples against any `/_cpcp` endpoint:
+Clients live in [cpcp_demo](https://github.com/laquereric/cpcp_demo)
+(`languages/`, eight languages) — PULL and PUSH examples against any
+`/_cpcp` endpoint:
 
 | Language | Transport | Notes |
 |---|---|---|
