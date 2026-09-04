@@ -17,14 +17,22 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 NOTES = [{"id": 1, "title": "Welcome", "body": "seeded by the demo seam"}]
 RECEIPTS = {}
 
+CONTEXT = {
+    "@vocab": "https://w3id.org/laquereric/cpcp/ns#",
+    "id": "@id",
+    "type": "@type",
+    "operationId": "https://w3id.org/laquereric/json-rpc-ld/ns#operationId",
+}
+
 
 def fail(rid, reason, because, status=400):
     return status, {"ok": False, "reason": reason, "because": because,
-                    "jsonrpc": "2.0", "id": rid}
+                    "@context": CONTEXT, "jsonrpc": "2.0", "id": rid}
 
 
 def ok(rid, result):
-    return 200, {"ok": True, "result": result, "jsonrpc": "2.0", "id": rid}
+    return 200, {"ok": True, "result": result, "@context": CONTEXT,
+                 "jsonrpc": "2.0", "id": rid}
 
 
 def dispatch(body):
@@ -36,7 +44,8 @@ def dispatch(body):
     if not isinstance(params, dict):
         return fail(rid, "unparseable_json", {"offender": "params"})
     if method == "note.list":
-        return ok(rid, {"notes": [dict(n) for n in NOTES]})
+        graph = [dict(n, **{"@id": "note:%d" % n["id"], "@type": "Note"}) for n in NOTES]
+        return ok(rid, {"@graph": graph})
     if method == "note.create":
         title = params.get("title")
         content = params.get("body")
@@ -48,11 +57,12 @@ def dispatch(body):
         if not op:
             return fail(rid, "operation_id_required", {"because": "PUSH names its intent first"})
         if op in RECEIPTS:
-            return ok(rid, RECEIPTS[op])
+            row = RECEIPTS[op]
+            return ok(rid, dict(row, **{"@id": "note:%d" % row["id"], "@type": "Note"}))
         row = {"id": len(NOTES) + 1, "title": title, "body": content}
         NOTES.append(row)
         RECEIPTS[op] = dict(row)
-        return ok(rid, dict(row))
+        return ok(rid, dict(row, **{"@id": "note:%d" % row["id"], "@type": "Note"}))
     return fail(rid, "unknown_operation", {"method": method})
 
 
@@ -69,7 +79,7 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(raw)
 
     def do_GET(self):
-        if self.path == "/up":
+        if self.path in ("/up", "/_cpcp/up"):
             return self._send(200, {"ok": True})
         if self.path == "/_cpcp/cid.json":
             import os

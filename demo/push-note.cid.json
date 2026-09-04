@@ -12,10 +12,14 @@
     {
       "method": "note.create",
       "iri": "https://w3id.org/cpcp/osi8/demo#note.create",
-      "params": {"title": "string (required)", "body": "string (required)"},
+      "params": {
+        "title": "string (required)",
+        "body": "string (required)"
+      },
       "operationId": "required",
       "result": "the created Note"
     }
   ],
-  "shapes": "@prefix sh: <http://www.w3.org/ns/shacl#> .\n@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n@prefix cpcp: <https://w3id.org/laquereric/cpcp/ns#> .\n@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n\ncpcp:NoteShape a sh:NodeShape ;\n  sh:targetClass cpcp:Note ;\n  sh:closed true ;\n  sh:ignoredProperties ( rdf:type ) ;\n  sh:property [ sh:path cpcp:title ; sh:datatype xsd:string ; sh:minCount 1 ; sh:maxCount 1 ] ;\n  sh:property [ sh:path cpcp:body ; sh:datatype xsd:string ; sh:minCount 1 ; sh:maxCount 1 ] .\n"
+  "shapes": "@prefix sh: <http://www.w3.org/ns/shacl#> .\n@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n@prefix cpcp: <https://w3id.org/laquereric/cpcp/ns#> .\n@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n\ncpcp:NoteShape a sh:NodeShape ;\n  sh:targetClass cpcp:Note ;\n  sh:closed true ;\n  sh:ignoredProperties ( rdf:type ) ;\n  sh:property [ sh:path cpcp:title ; sh:datatype xsd:string ; sh:minCount 1 ; sh:maxCount 1 ] ;\n  sh:property [ sh:path cpcp:body ; sh:datatype xsd:string ; sh:minCount 1 ; sh:maxCount 1 ] .\n",
+  "shape_ref": "shapes/note-shape.ttl (canonical; check-shapes.py fails on divergence)"
 }

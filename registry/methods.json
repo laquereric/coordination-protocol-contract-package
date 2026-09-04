@@ -243,7 +243,7 @@
         "demo runner"
       ],
       "params": "{}",
-      "result": "{notes[]}",
+      "result": "{@graph: array of Note}",
       "refusals": [
         "empty_body",
         "unparseable_json",
@@ -263,7 +263,7 @@
         "demo runner"
       ],
       "params": "{title, body}",
-      "result": "the created Note (replay on repeated operationId)",
+      "result": "the created Note with @id/@type",
       "refusals": [
         "empty_body",
         "unparseable_json",
