@@ -19,7 +19,7 @@ Examples: `.../vault#secret.put`, `.../bus#projection.latest`,
 Redirects are UNPUBLISHED: W3ID is durable redirect plus stewardship,
 not a magic availability guarantee, and no redirect exists yet. IRIs
 are intent until they resolve — recorded as such in
-`registry/methods.json`, never implied to dereference.
+`registry/methods.json` in cpcp_registry, never implied to dereference.
 
 ## JSON-LD contexts
 

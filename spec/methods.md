@@ -1,6 +1,6 @@
 # Method contract conventions
 
-Source: `registry/methods.json` (extracted copy of the manifested
+Source: `registry/methods.json` in cpcp_registry (extracted copy of the manifested
 boundary). Conventions every method follows; the registry states the
 per-method facts.
 

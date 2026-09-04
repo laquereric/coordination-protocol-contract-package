@@ -58,9 +58,10 @@ demo/                CIDs (*.cid.json), stub seam (server), matrix
 languages/<lang>/    README plus examples/{push,pull} clients
 ```
 
-This repo (the contract home) carries `spec/`, `registry/`, `ontology/`,
+This repo (the contract home) carries `spec/`, `ontology/`,
 and `PROVENANCE.json` instead of a demo of its own: the demo lives in
-`cpcp_demo` so the contract never depends on example code.
+`cpcp_demo` so the contract never depends on example code, and the
+registries live in `cpcp_registry`.
 
 ## Standing on
 
@@ -69,25 +70,17 @@ CPCP is layered on the base protocol
 the **shapes**; CPCP is the **transport of the grant** and the packaging of it.
 Do not restate the base here — depend on it.
 
-This repo is the **standard + registry**. Each CPCP lives in **its own Git repo**.
-
-## Naming & versioning
-
-| Form | Meaning |
-|---|---|
-| `JSON-RPC-LD-PS1` | the standard (this repo) |
-| `JSON-RPC-LD-PS1-P{N}` | the CPCP repo for Profile N (its own Git repo) |
-| `JSON-RPC-LD-PS1-P{N}.{VV}` | a **labeled SHA** (a Git tag) pinning a specific commit of that CPCP repo |
-
-These identifiers are unchanged by the rename. `PS1` remains the standard's
-name; `CPCP` names what a package of it is.
+This repo is the **standard**. Each CPCP lives in **its own Git repo**.
+Naming, versioning, and the method/seam registries live in
+[cpcp_registry](https://github.com/laquereric/cpcp_registry).
 
 ## Registry
 
-See `registry.json`. Profile entries appear here when their repositories
-are public and stable — no dead links are listed. The demo CIDs live in
+Lives in [cpcp_registry](https://github.com/laquereric/cpcp_registry):
+profile entries (only public, stable repos — no dead links), the method
+registry, and the seam registry. The demo CIDs live in
 [cpcp_demo](https://github.com/laquereric/cpcp_demo) and are the runnable
-reference, not registry entries here.
+reference, not registry entries anywhere.
 
 ## Extracted contracts
 
@@ -95,8 +88,7 @@ reference, not registry entries here.
 magentic-stack pod that runs this contract in production: envelopes,
 HTTP mapping, idempotency, refusal taxonomy, method conventions, layer
 authority, operation identity, plus background positioning.
-`registry/` holds the extracted method and seam registries with
-provenance. One-way extraction; the monorepo follows this repo pinned.
+One-way extraction; the monorepo follows this repo pinned.
 
 ## Implementations
 

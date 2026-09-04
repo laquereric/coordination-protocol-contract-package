@@ -1,7 +1,0 @@
-{
-  "@context": "https://w3id.org/laquereric/cpcp/ns#",
-  "standard": "JSON-RPC-LD-PS1",
-  "title": "PubSubStandard_1",
-  "cpcps": [],
-  "note": "Profile entries appear here when their repositories are public and stable. See README Registry."
-}

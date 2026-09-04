@@ -3,14 +3,49 @@
   "source_commit": "7324845",
   "source_date": "2026-09-04",
   "entries": {
-    "E1": ["envelope formats", "rails-cpcp envelope.rb, request_body.rb", "bus/vault/persist controllers", "mind_seam.py"],
-    "E2": ["HTTP mapping", "dual-v1 freeze doc", "row-49 dual-signal ruling"],
-    "E3": ["idempotency", "idempotency.rb", "dispatcher operationId rules"],
-    "E4": ["refusal taxonomy", "all seam implementations (rails, bus, vault, persist, mind, switch)"],
-    "E5": ["method conventions", "boundary manifest", "operation registry"],
-    "E6": ["layer authority", "row-105 review", "seam authority layers"],
-    "E7": ["operation identity", "w3id successor convention", "seam authority"],
-    "E8": ["background positioning", "Hydra/WebMCP/JSON-RPC-LD cross-reference analysis"],
-    "E9": ["registry copies", "boundary_manifest.json (12 methods)", "seam_authority.json (6 seams)"]
+    "E1": [
+      "envelope formats",
+      "rails-cpcp envelope.rb, request_body.rb",
+      "bus/vault/persist controllers",
+      "mind_seam.py"
+    ],
+    "E2": [
+      "HTTP mapping",
+      "dual-v1 freeze doc",
+      "row-49 dual-signal ruling"
+    ],
+    "E3": [
+      "idempotency",
+      "idempotency.rb",
+      "dispatcher operationId rules"
+    ],
+    "E4": [
+      "refusal taxonomy",
+      "all seam implementations (rails, bus, vault, persist, mind, switch)"
+    ],
+    "E5": [
+      "method conventions",
+      "boundary manifest",
+      "operation registry"
+    ],
+    "E6": [
+      "layer authority",
+      "row-105 review",
+      "seam authority layers"
+    ],
+    "E7": [
+      "operation identity",
+      "w3id successor convention",
+      "seam authority"
+    ],
+    "E8": [
+      "background positioning",
+      "Hydra/WebMCP/JSON-RPC-LD cross-reference analysis"
+    ],
+    "E9": [
+      "registry copies (now maintained in cpcp_registry)",
+      "boundary_manifest.json (12 methods)",
+      "seam_authority.json (6 seams)"
+    ]
   }
 }

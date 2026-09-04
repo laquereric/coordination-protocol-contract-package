@@ -15,7 +15,7 @@ Source: row-105 review, expressed in `seam_authority.json`.
 | **REST resource binding** | URI/resource identity, uniform-interface use, safe/idempotent expectations, representations, links, conditionals, lifecycle where claimed | Procedure names, envelope conformance, vocabulary meaning, authorization beyond HTTP-visible signaling |
 | **W3ID/RDF vocabulary** | Durable identity and meaning of shapes, properties, classes, operations; term versioning and governance | Dispatch, endpoint location, auth, status, cache policy, proof of conformance |
 
-Every live seam declares its bindings (`registry/seams.json`).
+Every live seam declares its bindings (`registry/seams.json` in cpcp_registry).
 CPCP's own seams speak `http` + `cpcp`; none claims `rest` (the vault
 REST surface was retired) — resource-oriented bindings are declared
 only where actually exposed.
