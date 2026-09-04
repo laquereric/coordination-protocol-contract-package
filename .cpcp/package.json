@@ -1,0 +1,169 @@
+{
+  "kind": "cpcp-contract",
+  "version": 1,
+  "name": "coordination-protocol-contract-package",
+  "description": "The CPCP contract home: envelopes, refusal taxonomy, idempotency, method conventions, layer authority, operation identity and scopes, plus the base OWL ontology.",
+  "self_rev": "434ef84",
+  "note": "The contract home carries spec/ and ontology/ instead of a demo of its own. It declares no seam and serves no route: nothing here is reachable at any scope.",
+  "spec": {
+    "envelope": "spec/envelope.md",
+    "refusals": "spec/refusals.md",
+    "idempotency": "spec/idempotency.md",
+    "methods": "spec/methods.md",
+    "identity": "spec/identity.md",
+    "layers": "spec/layers.md",
+    "scopes": "spec/scopes.md",
+    "http-mapping": "spec/http-mapping.md",
+    "background": "spec/background.md"
+  },
+  "ontology": {
+    "file": "ontology/cpcp-base.ttl",
+    "ontology_iri": "https://w3id.org/cpcp/ontology/base/1.0.0",
+    "term_namespace": "https://w3id.org/cpcp/ns#",
+    "imports": "https://w3id.org/json-rpc-ld/ontology/core/1.0.0"
+  },
+  "provenance": "PROVENANCE.json",
+  "standing_on": {
+    "repo": "https://github.com/laquereric/json-rpc-ld",
+    "note": "Base owns the shapes; CPCP is the transport of the grant and the packaging of it. Do not restate the base here."
+  },
+  "related": {
+    "registry": "https://github.com/laquereric/cpcp_registry",
+    "demo": "https://github.com/laquereric/cpcp_demo"
+  },
+  "scopes": {
+    "source": "spec/scopes.md",
+    "rule": "Every CPCP seam is reachable at exactly one scope. The method contract is identical at every scope; exposure is not. A method reachable at two scopes is the same method under two exposure rules, never two methods.",
+    "change_rule": "Adding a scope to a seam is a contract change: update spec/scopes.md, the seam gate, and the demo matrix runner -- never just the compose file.",
+    "vocabulary": {
+      "public_cpcp": {
+        "summary": "Exposed to public, like the demo.",
+        "auth": "none; refusals still apply, unknown methods refuse everywhere",
+        "constraints": [
+          "no credentials",
+          "no real data",
+          "no published ports beyond operator loopback",
+          "replay-safe to observe: reads only, or writes against evaporating demo state"
+        ],
+        "defect": "A public endpoint that admits a real write is a defect, not a demo."
+      },
+      "pod_internal_cpcp": {
+        "summary": "Exposed to coordinate containers.",
+        "auth": "per-seam allowlist (*_CALLERS) plus Bearer; fail-closed boot on empty allowlists",
+        "constraints": [
+          "pod-network traffic only",
+          "ports unpublished: expose, never ports:",
+          "a container without its caller token does not start",
+          "a caller without the operation does not pass"
+        ],
+        "refusal": "401/403 plus envelope to an unauthenticated or unallowlisted caller is designed behaviour, not an error path."
+      },
+      "pod_external_cpcp": {
+        "summary": "Exposed within the ecosystem.",
+        "auth": "operator surfaces keep read-back asymmetry where it matters",
+        "constraints": [
+          "host-published loopback for operators, editors and browsers",
+          "reachable from the host, never from the open internet",
+          "no direct domain writes except through CPCP admission"
+        ],
+        "invariant": "Publishing a port never widens what the seam admits."
+      }
+    },
+    "method_map": [
+      {
+        "seam": "back",
+        "methods": [
+          "note.*",
+          "journal/session/graph operations"
+        ],
+        "scopes": [
+          "pod_internal_cpcp",
+          "pod_external_cpcp"
+        ],
+        "note": "pod BACK plus host BACK"
+      },
+      {
+        "seam": "vault",
+        "methods": [
+          "vault.secret.put",
+          "vault.secret.list",
+          "vault.secret.get"
+        ],
+        "scopes": [
+          "pod_internal_cpcp"
+        ],
+        "note": "config and switch callers"
+      },
+      {
+        "seam": "bus",
+        "methods": [
+          "bus.projection.latest"
+        ],
+        "scopes": [
+          "pod_internal_cpcp"
+        ],
+        "note": "no production caller yet"
+      },
+      {
+        "seam": "persist",
+        "methods": [
+          "persist.path.set",
+          "persist.path.get"
+        ],
+        "scopes": [
+          "pod_internal_cpcp"
+        ],
+        "note": "config-admin caller"
+      },
+      {
+        "seam": "mind",
+        "methods": [
+          "mind.reading.latest",
+          "mind.cognition.request",
+          "mind.up"
+        ],
+        "scopes": [
+          "pod_internal_cpcp"
+        ],
+        "note": "conformance, debug"
+      },
+      {
+        "seam": "switch data",
+        "methods": [
+          "/v1/* completions"
+        ],
+        "scopes": [
+          "pod_internal_cpcp"
+        ],
+        "note": "MIND only; browsers rejected"
+      },
+      {
+        "seam": "switch UI",
+        "methods": [
+          "/api/* sources/refresh/verify/test"
+        ],
+        "scopes": [
+          "pod_internal_cpcp"
+        ],
+        "note": "config-admin display; host port retired"
+      },
+      {
+        "seam": "demo stub",
+        "methods": [
+          "note.list",
+          "note.create"
+        ],
+        "scopes": [
+          "public_cpcp"
+        ],
+        "note": "evaporating state only"
+      }
+    ],
+    "unmapped": [
+      {
+        "seam": "switchyard-offline",
+        "because": "Live in magentic-stack (switchyard.route, cpcp.ready, cid) but absent from the map above. Browser-local credential routing, not pod-network traffic, so none of the three scopes is obviously correct. Needs a contract decision."
+      }
+    ]
+  }
+}
