@@ -3,7 +3,7 @@
   "version": 1,
   "name": "coordination-protocol-contract-package",
   "description": "The CPCP contract home: envelopes, refusal taxonomy, idempotency, method conventions, layer authority, operation identity and scopes, plus the base OWL ontology.",
-  "self_rev": "434ef84",
+  "self_rev": "434ef847c883307caebaf0e18a1eb458a76c48b5",
   "note": "The contract home carries spec/ and ontology/ instead of a demo of its own. It declares no seam and serves no route: nothing here is reachable at any scope. The layout every CPCP package repo follows, including the per-scope manifests, is specified in spec/repo-format.md; this repo serves no seam and therefore carries the index alone.",
   "spec": {
     "background": "spec/background.md",
@@ -166,5 +166,9 @@
         "because": "Live in magentic-stack (switchyard.route, cpcp.ready, cid) but absent from the map above. Browser-local credential routing, not pod-network traffic, so none of the three scopes is obviously correct. Needs a contract decision."
       }
     ]
-  }
+  },
+  "gates": [
+    "tooling/check-repo-format.py",
+    "tooling/plant-repo-format.py"
+  ]
 }

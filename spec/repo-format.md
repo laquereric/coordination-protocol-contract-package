@@ -82,6 +82,33 @@ Scope directory names are the scope names exactly: `public_cpcp`,
 
 `back` appears in two scope manifests, by rule 1.
 
+## Checking a repo against this format
+
+```bash
+python3 tooling/check-repo-format.py [REPO ...]
+```
+
+With no argument it checks the contract home; point it at any package repo, or
+several at once. It reads only `.cpcp/`. It holds the required fields, keeps a
+scope directory and its manifest agreeing about which scope they are, requires
+a `because` where rules 2 and 3 require one, requires exposure to cite evidence
+(rule 4), and refuses an abbreviated SHA (rule 5). It also resolves declared
+paths against the tree, which is not one of the six rules: a manifest naming a
+file that does not exist is how a manifest and its repo drift apart when files
+move.
+
+Two things it cannot decide, and does not pretend to:
+
+* **Rule 1** needs to know that two seam entries in two scope manifests are the
+  *same* seam. Ids are free text, so the checker prints seam ids per scope and
+  leaves that judgement to a reader.
+* **Rule 4** can require that exposure cites evidence. It cannot tell whether
+  the citation is true — a wrong line number is still a wrong line number.
+
+`tooling/plant-repo-format.py` breaks each rule in a temporary repo and requires
+the checker to refuse it. A checker nobody has watched fail is a guess about
+what it would do.
+
 ## This repo
 
 The contract home serves no seam and draws no route, so it has an index and
