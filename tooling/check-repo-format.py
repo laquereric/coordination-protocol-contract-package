@@ -120,6 +120,50 @@ def check_paths(doc, where, repo, rep):
                      % (path.lstrip("."), value))
 
 
+def check_cids(index, where, repo, rep):
+    """Rule 7. Every CID has at least one example caller.
+
+    A CID nobody can run is a claim; a CID with a caller is an interface. ONE is
+    the requirement -- a repo whose purpose is demonstration carries many, and
+    that is a choice rather than the bar.
+    """
+    cids = index.get("cids")
+    if cids is None:
+        return
+    if not isinstance(cids, list) or not cids:
+        rep.fail(where, "cids must be a non-empty list when present")
+        return
+
+    for i, entry in enumerate(cids):
+        # A BARE STRING DECLARES NO CALLER. The older shape listed CID paths
+        # alone, which cannot express rule 7 at all -- so it fails, and says how
+        # to say it instead.
+        if isinstance(entry, str):
+            rep.fail(where, "cids[%d] is the bare path %r and declares no example "
+                            "caller; rule 7 wants "
+                            '{\"cid\": %r, \"examples\": [\"...\"]}' % (i, entry, entry))
+            continue
+        if not isinstance(entry, dict):
+            rep.fail(where, "cids[%d] must be an object with cid and examples" % i)
+            continue
+
+        cid_path = str(entry.get("cid", "")).strip()
+        if not cid_path:
+            rep.fail(where, "cids[%d] has no 'cid'" % i)
+        elif not os.path.isfile(os.path.join(repo, cid_path)):
+            rep.fail(where, "cids[%d].cid names %r, which is not a file" % (i, cid_path))
+
+        examples = entry.get("examples")
+        if not isinstance(examples, list) or not examples:
+            rep.fail(where, "cids[%d] (%s) declares no example caller; rule 7 wants at "
+                            "least one, in any language" % (i, cid_path or "?"))
+            continue
+        for ex in examples:
+            if not os.path.isfile(os.path.join(repo, str(ex))):
+                rep.fail(where, "cids[%d] (%s) names example %r, which is not a file"
+                         % (i, cid_path or "?", ex))
+
+
 def check_scope_manifest(repo, scope_dir, rep):
     rel = os.path.join(".cpcp", scope_dir, "package.json")
     full = os.path.join(repo, rel)
@@ -240,6 +284,8 @@ def check_repo(repo):
         elif scope not in on_disk:
             rep.fail(index_rel, "scopes.manifests[%r] is declared but .cpcp/%s/ is not "
                                 "a scope directory" % (scope, scope))
+
+    check_cids(index, index_rel, repo, rep)
 
     for entry in index.get("unscoped_seams", []) or []:
         if isinstance(entry, dict) and not str(entry.get("because", "")).strip():

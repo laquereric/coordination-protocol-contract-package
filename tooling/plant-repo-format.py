@@ -148,9 +148,39 @@ CASES = [
      lambda: build(index=edit(VALID_INDEX, "cids", ["cid/pull-note.cid.json"])),
      "does not exist in this repo"),
 
-    ("declared-path-present",
+    # Rule 7. A CID nobody can run is a claim, not an interface.
+    ("cid-without-example",
+     lambda: build(index=edit(VALID_INDEX, "cids",
+                              [{"cid": "cid/pull-note.cid.json", "examples": []}]),
+                   files=("cid/pull-note.cid.json",)),
+     "declares no example caller"),
+
+    ("cid-as-bare-string",
      lambda: build(index=edit(VALID_INDEX, "cids", ["cid/pull-note.cid.json"]),
                    files=("cid/pull-note.cid.json",)),
+     "declares no example caller"),
+
+    ("cid-example-missing",
+     lambda: build(index=edit(VALID_INDEX, "cids",
+                              [{"cid": "cid/pull-note.cid.json",
+                                "examples": ["examples/python/pull.py"]}]),
+                   files=("cid/pull-note.cid.json",)),
+     "is not a file"),
+
+    ("cid-file-missing",
+     lambda: build(index=edit(VALID_INDEX, "cids",
+                              [{"cid": "cid/gone.cid.json",
+                                "examples": ["examples/python/pull.py"]}]),
+                   files=("examples/python/pull.py",)),
+     "is not a file"),
+
+    # ONE caller is the bar. This must PASS, or the standard would be demanding
+    # a demonstration from every package.
+    ("cid-with-one-example",
+     lambda: build(index=edit(VALID_INDEX, "cids",
+                              [{"cid": "cid/pull-note.cid.json",
+                                "examples": ["examples/python/pull.py"]}]),
+                   files=("cid/pull-note.cid.json", "examples/python/pull.py")),
      None),
 ]
 
