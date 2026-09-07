@@ -288,6 +288,41 @@ CASES = [
          "name": "FRONT", "doc": "docs/architecture/OVERVIEW.md"})),
      "does not exist in this repo"),
 
+    # ---- Rule 9: a declared role names one of the four.
+
+    ("role-valid", lambda: build(index=dict(VALID_INDEX,
+        role={"name": "BACK", "of": "example.test"})), None),
+
+    # Declaring no role is fine: a library that neither serves nor calls has none.
+    ("role-absent", lambda: build(), None),
+
+    ("role-unknown-name", lambda: build(index=dict(VALID_INDEX,
+        role={"name": "SWITCH", "of": "example.test"})), "expected one of"),
+
+    ("role-not-an-object", lambda: build(index=dict(VALID_INDEX, role="BACK")),
+     "must be an object"),
+
+    ("role-also-reified-unknown", lambda: build(index=dict(VALID_INDEX,
+        role={"name": "BACK", "also_reified": {"MIND": "x"}})), "which is not a role"),
+
+    ("role-also-reified-duplicates-name", lambda: build(index=dict(VALID_INDEX,
+        role={"name": "BACK", "also_reified": {"BACK": "x"}})), "repeats"),
+
+    # The conformance claim: co-locating FRONT and BACK is not a conformant
+    # deployment, so a repo carrying both must say it does not.
+    ("role-front-and-back-unstated", lambda: build(index=dict(VALID_INDEX,
+        role={"name": "BACK", "also_reified": {"FRONT": "x"}})),
+     "separate_containers"),
+
+    ("role-front-and-back-declared-separate", lambda: build(index=dict(VALID_INDEX,
+        role={"name": "BACK", "also_reified": {"FRONT": "x"},
+              "separate_containers": True})), None),
+
+    # Only `true` counts. A truthy string is somebody hedging.
+    ("role-separate-containers-not-true", lambda: build(index=dict(VALID_INDEX,
+        role={"name": "BACK", "also_reified": {"FRONT": "x"},
+              "separate_containers": "yes"})), "separate_containers"),
+
     # ---- The published vocabulary must be complete and must invent nothing.
 
     ("scope-definitions-complete",

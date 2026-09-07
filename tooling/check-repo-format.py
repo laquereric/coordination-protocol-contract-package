@@ -46,6 +46,10 @@ SCOPES = ("dependency", "pod_internal_dependencies",
 # The outbound half: entries are CIDs this repo CALLS, and carry depends_on.
 DEPENDENCY_SCOPES = frozenset({"dependency", "pod_internal_dependencies"})
 
+# A CPCP unit is four roles (spec/roles.md). Closed set: an unknown name is a
+# role this contract does not define, and a reader resolving it comes up empty.
+ROLES = ("FRONT", "BACK", "BackJob", "GRAPH")
+
 # 'published' means the producer's CID names the operation today. Anything
 # else is a dependency the caller is waiting on, and rule 8 makes it say why.
 DEPENDENCY_STATUSES = ("published", "unbuilt", "retired")
@@ -201,6 +205,55 @@ def check_cids(index, where, repo, rep):
             if not os.path.isfile(os.path.join(repo, str(ex))):
                 rep.fail(where, "cids[%d] (%s) names example %r, which is not a file"
                          % (i, cid_path or "?", ex))
+
+
+def check_role(index, rel, rep):
+    """Rule 9: a declared role names one of the four, and admits its co-locations.
+
+    Declaring a role is optional -- a library that neither serves nor calls has
+    none. Declaring one loosely is not: a reader uses it to know whether this
+    repo is the seam or something calling it.
+    """
+    role = index.get("role")
+    if role is None:
+        return
+    if not isinstance(role, dict):
+        rep.fail(rel, "role must be an object with a 'name' (rule 9)")
+        return
+
+    name = role.get("name")
+    if name not in ROLES:
+        rep.fail(rel, "role.name is %r; expected one of %s (rule 9)"
+                 % (name, ", ".join(ROLES)))
+
+    also = role.get("also_reified") or {}
+    if not isinstance(also, dict):
+        rep.fail(rel, "role.also_reified must be an object keyed by role name (rule 9)")
+        also = {}
+    for other in also:
+        if other not in ROLES:
+            rep.fail(rel, "role.also_reified names %r, which is not a role; expected "
+                          "one of %s (rule 9)" % (other, ", ".join(ROLES)))
+        if other == name:
+            # Listing your own role again says nothing and hides whether a
+            # SECOND container of that role exists.
+            rep.fail(rel, "role.also_reified repeats %r, which is already role.name; "
+                          "a second container of the same role needs its own "
+                          "description, not a duplicate key (rule 9)" % other)
+
+    # The one claim the reference implementation makes about roles: co-locating
+    # FRONT and BACK is not a conformant deployment. A repo carrying both must
+    # say it does not, or the manifest reads as conformant while describing the
+    # arrangement the claim forbids.
+    carried = {name} | set(also)
+    if {"FRONT", "BACK"} <= carried and role.get("separate_containers") is not True:
+        rep.fail(rel, "role carries both FRONT and BACK but does not say "
+                      "separate_containers: true; co-locating them is not a "
+                      "conformant CPCP deployment (rule 9)")
+
+    if name in ROLES:
+        extra = (" (+ %s)" % ", ".join(sorted(also))) if also else ""
+        rep.note("role: %s%s" % (name, extra))
 
 
 def check_scope_manifest(repo, scope_dir, rep):
@@ -417,6 +470,7 @@ def check_repo(repo):
                                 "a scope directory" % (scope, scope))
 
     check_cids(index, index_rel, repo, rep)
+    check_role(index, index_rel, rep)
 
     for entry in index.get("unscoped_seams", []) or []:
         if isinstance(entry, dict) and not str(entry.get("because", "")).strip():

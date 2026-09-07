@@ -40,6 +40,7 @@ Every requirement below names the test that decides it. The test is
 | `cids` | when CIDs are declared | each entry resolves, and carries at least one example — see rule 7 |
 | `scopes.manifests` | when scopes are served | `{scope: path}`; each path is a file, each scope is a real scope name |
 | `unscoped_seams` | when any exists | each entry has a `because` |
+| `role` | when the repo reifies one | `name` is one of the four ([roles](roles.md)); see rule 9 |
 
 ### Scope manifest — `.cpcp/<scope>/package.json`
 
@@ -59,7 +60,7 @@ what it depends on, and one field meaning both would make a manifest
 readable only by knowing which folder it sat in. A `dependency` manifest
 carrying `seams`, or a serving manifest carrying `depends_on`, fails.
 
-### Eight rules
+### Nine rules
 
 1. **One seam, many scopes.** A seam appears in every scope manifest it is
    reachable at. Identical method contract, different exposure — one seam under
@@ -129,6 +130,23 @@ A bare string in `cids` declares no caller and fails rule 7.
 
 A live one is in note [1].
 
+9. **A declared role names one of the four, and admits its co-locations.**
+   `role.name` is FRONT, BACK, BackJob or GRAPH ([roles](roles.md)); so is every
+   key of `role.also_reified`. A repo reifying **both FRONT and BACK** must say
+   `separate_containers` — the reference implementation calls co-locating them
+   non-conformant, and a manifest carrying both without stating the split reads
+   as conformant while describing the arrangement the claim forbids.
+   *Test: an unknown role name fails; a role repeated between `name` and
+   `also_reified` fails; FRONT-with-BACK and no `separate_containers` fails.
+   Whether the containers are REALLY separate is not decidable here — that is
+   what the claim is for, and a false claim is still one somebody can check.*
+
+```json
+"role": { "name": "BACK", "of": "example.test",
+          "also_reified": { "FRONT": "a separate container" },
+          "separate_containers": true }
+```
+
 ## Optional
 
 None of this is required, and a repo without it conforms.
@@ -184,7 +202,7 @@ python3 tooling/check-repo-format.py [REPO ...]
 
 No argument checks the contract home; otherwise point it at any package repo, or
 several. It reads only `.cpcp/` and the paths that manifest declares. It also
-resolves declared paths against the tree — not one of the eight rules, and it
+resolves declared paths against the tree — not one of the nine rules, and it
 earns its place: a manifest naming a file that does not exist is how a manifest
 and its repo drift apart when files move.
 
