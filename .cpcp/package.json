@@ -34,7 +34,7 @@
   },
   "scopes": {
     "source": "spec/scopes.md",
-    "rule": "A scope answers which way the call runs, and how far. Outbound: this repo calls a CID somebody else serves (dependency). Inbound: this repo serves it, reachable beyond its pod (services) or only beside it (pod_internal). The method contract is identical at every scope; reach is not. A seam served both inside the pod and beyond appears in two manifests -- one seam under two rules, never two seams.",
+    "rule": "A scope answers two questions at once: which way the call runs, and how far. Calls beyond the pod: dependency. Calls within it: pod_internal_dependencies. Serves beyond the pod: services. Serves within it: pod_internal_services. Direction decides the field -- a calling scope carries depends_on, a serving scope carries seams. The method contract is identical at every scope; reach is not.",
     "change_rule": "Adding a scope to a seam is a contract change: update spec/scopes.md, the seam gate, and the demo matrix runner -- never just the compose file.",
     "method_map": [
       {
@@ -44,7 +44,7 @@
           "journal/session/graph operations"
         ],
         "scopes": [
-          "pod_internal",
+          "pod_internal_services",
           "services"
         ],
         "note": "pod BACK plus host BACK"
@@ -57,7 +57,7 @@
           "vault.secret.get"
         ],
         "scopes": [
-          "pod_internal"
+          "pod_internal_services"
         ],
         "note": "config and switch callers"
       },
@@ -67,7 +67,7 @@
           "bus.projection.latest"
         ],
         "scopes": [
-          "pod_internal"
+          "pod_internal_services"
         ],
         "note": "no production caller yet"
       },
@@ -78,7 +78,7 @@
           "persist.path.get"
         ],
         "scopes": [
-          "pod_internal"
+          "pod_internal_services"
         ],
         "note": "config-admin caller"
       },
@@ -90,7 +90,7 @@
           "mind.up"
         ],
         "scopes": [
-          "pod_internal"
+          "pod_internal_services"
         ],
         "note": "conformance, debug"
       },
@@ -100,7 +100,7 @@
           "/v1/* completions"
         ],
         "scopes": [
-          "pod_internal"
+          "pod_internal_services"
         ],
         "note": "MIND only; browsers rejected"
       },
@@ -110,7 +110,7 @@
           "/api/* sources/refresh/verify/test"
         ],
         "scopes": [
-          "pod_internal"
+          "pod_internal_services"
         ],
         "note": "config-admin display; host port retired"
       },

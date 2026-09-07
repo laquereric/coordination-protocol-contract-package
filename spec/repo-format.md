@@ -5,16 +5,17 @@ A CPCP package repo declares its interface in `.cpcp/`. Machine readers start at
 
 ```text
 .cpcp/package.json            index. Always present.
-.cpcp/<scope>/package.json    one per scope the repo SERVES. Zero or more.
+.cpcp/<scope>/package.json    one per scope the repo STANDS IN. Zero or more.
 ```
 
 Scope directory names are the scope names exactly: `dependency`,
-`pod_internal`, `services` ([scopes](scopes.md)).
+`pod_internal_dependencies`, `pod_internal_services`, `services`
+([scopes](scopes.md)).
 
 `.cpcp/<scope>/` says *this repo stands in that relation*. For
-`pod_internal` and `services` that means it serves the seams listed. For
-`dependency` it means the opposite — it **calls** what is listed, and
-something else serves it.
+`pod_internal_services` and `services` that means it serves the seams listed. For
+`dependency` and `pod_internal_dependencies` it means the opposite — it
+**calls** what is listed, and something else serves it.
 
 **A terse interface spec is the point.** A CID and a caller that runs say what a
 paragraph cannot: what the methods are, what they accept, what comes back. Prose
@@ -49,8 +50,8 @@ Every requirement below names the test that decides it. The test is
 | `of` | always | non-empty |
 | `definition` | always | non-empty |
 | `source` | always | non-empty |
-| `seams` | `pod_internal`, `services` | a list; may be empty, and then rule 2 applies |
-| `depends_on` | `dependency` | a list; may be empty, and then rule 2 applies — see rule 8 |
+| `seams` | `pod_internal_services`, `services` | a list; may be empty, and then rule 2 applies |
+| `depends_on` | `dependency`, `pod_internal_dependencies` | a list; may be empty, and then rule 2 applies — see rule 8 |
 | `exposure` | when it can be measured | carries `evidence` naming where it was read |
 
 `seams` and `depends_on` are not interchangeable. A repo does not serve
@@ -151,7 +152,8 @@ scopes and no `dependency`:
 ```text
 .cpcp/package.json                index; registry by SHA; switchyard-offline
                                   under unscoped_seams with its because
-.cpcp/pod_internal/package.json   back, vault, bus, persist, mind
+.cpcp/pod_internal_services/package.json
+                                  back, vault, bus, persist, mind
 .cpcp/services/package.json       back (host), plus published surfaces that
                                   are not seams
 ```
@@ -207,7 +209,7 @@ It lives in exactly one file. It was in the index as well until keeping both in
 step became the reader's problem rather than the format's — a second copy of a
 definition is a second thing to drift. The index points; the manifest defines.
 
-`pod_internal` and `dependency` have no directory here: this repo serves nothing
+The three other scopes have no directory here: this repo serves nothing
 on a pod network and calls nothing. A scope directory asserts a relation, and
 two empty ones would assert two false ones.
 

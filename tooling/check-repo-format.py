@@ -35,10 +35,16 @@ import re
 import sys
 
 KINDS = ("cpcp-contract", "cpcp-registry", "cpcp-demo", "cpcp-application")
-SCOPES = ("dependency", "pod_internal", "services")
+# Direction x reach. Both axes are named, so neither has to be inferred.
+#
+#                      calls (outbound)            serves (inbound)
+#   beyond the pod     dependency                  services
+#   within the pod     pod_internal_dependencies   pod_internal_services
+SCOPES = ("dependency", "pod_internal_dependencies",
+          "pod_internal_services", "services")
 
-# The one scope that runs outbound: entries are CIDs this repo CALLS.
-DEPENDENCY_SCOPE = "dependency"
+# The outbound half: entries are CIDs this repo CALLS, and carry depends_on.
+DEPENDENCY_SCOPES = frozenset({"dependency", "pod_internal_dependencies"})
 
 # 'published' means the producer's CID names the operation today. Anything
 # else is a dependency the caller is waiting on, and rule 8 makes it say why.
@@ -197,7 +203,7 @@ def check_scope_manifest(repo, scope_dir, rep):
     # dependency runs the other way: this repo CALLS what is listed, and
     # something else serves it. The two lists are not interchangeable, so
     # each scope is held to its own field and refused the other one.
-    if scope_dir == DEPENDENCY_SCOPE:
+    if scope_dir in DEPENDENCY_SCOPES:
         check_depends_on(doc, rel, rep)
         if "seams" in doc:
             rep.fail(rel, "a dependency manifest carries 'depends_on', not 'seams'; "
@@ -215,8 +221,9 @@ def check_scope_manifest(repo, scope_dir, rep):
             rep.fail(rel, "seams is empty and there is no 'because' naming what serves "
                           "this scope instead (rule 2)")
         if "depends_on" in doc:
-            rep.fail(rel, "'depends_on' belongs in the %s manifest; a serving scope "
-                          "lists what it serves" % DEPENDENCY_SCOPE)
+            rep.fail(rel, "'depends_on' belongs in a calling scope (%s); a serving "
+                          "scope lists what it serves"
+                     % ", ".join(sorted(DEPENDENCY_SCOPES)))
 
         exposure = doc.get("exposure")
         if isinstance(exposure, dict) and not str(exposure.get("evidence", "")).strip():
@@ -225,6 +232,20 @@ def check_scope_manifest(repo, scope_dir, rep):
                           "and a restatement of the method-to-scope map is not evidence")
 
         if isinstance(seams, list) and seams:
+            # Rule 1 puts the same seam in several manifests, so each copy
+            # repeats its own scope. Only the manifest's top-level scope was
+            # ever checked, which let a copy keep a name the folder had left
+            # behind -- silent, and exactly wrong for the reader who trusts
+            # the entry over the path. Found the hard way in a rename.
+            for i, seam in enumerate(seams):
+                if not isinstance(seam, dict) or "scope" not in seam:
+                    continue
+                if seam["scope"] != scope_dir:
+                    rep.fail(rel, "seams[%d] (%s) says scope %r, but it sits in %r; a "
+                                  "seam entry cannot name a scope other than the manifest "
+                                  "holding it" % (i, seam.get("id", "?"),
+                                                  seam["scope"], scope_dir))
+
             ids = [s.get("id") for s in seams if isinstance(s, dict)]
             rep.note("%s serves seams: %s" % (scope_dir, ", ".join(str(i) for i in ids)))
 

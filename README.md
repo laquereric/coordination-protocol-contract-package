@@ -78,11 +78,14 @@ start at `.cpcp/package.json`; humans start at `README.md`.
 ```text
 .cpcp/package.json            index: kind, version, contract rev, registry
                               by SHA, unscoped seams, gates
-.cpcp/<scope>/package.json    one per scope the repo STANDS IN. Serving
-                              (services, pod_internal): definition, seams,
-                              measured exposure, invariants. Calling
-                              (dependency): the CIDs it calls, each with
-                              its producer and a built/unbuilt status
+.cpcp/<scope>/package.json    one per scope the repo STANDS IN, named by
+                              direction and reach:
+                                services / pod_internal_services
+                                  what it serves -- seams, measured
+                                  exposure, invariants
+                                dependency / pod_internal_dependencies
+                                  what it calls -- each CID with its
+                                  producer and a built/unbuilt status
 demo/                         CIDs (*.cid.json), stub seam (server), matrix
                               runner, shape check, canonical shapes
 languages/<lang>/             README plus examples/{push,pull} clients

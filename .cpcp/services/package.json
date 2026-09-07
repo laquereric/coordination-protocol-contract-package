@@ -19,7 +19,18 @@
       ],
       "invariant": "Adding a dependency obliges the producer to nothing it has not already published."
     },
-    "pod_internal": {
+    "pod_internal_dependencies": {
+      "summary": "A seam this repo calls on a container beside it.",
+      "direction": "outbound, pod-network only: entries are not seams of this repo",
+      "constraints": [
+        "same shape as dependency; what differs is reach -- the producer is a container on the same pod network",
+        "this is the side that holds the caller token, and a container without its token does not start",
+        "an undeclared pod-internal dependency is a boot failure waiting for a deploy",
+        "no exposure block: the producer measures its own"
+      ],
+      "invariant": "Being inside the pod does not make a caller a server."
+    },
+    "pod_internal_services": {
       "summary": "Served to containers beside this one.",
       "direction": "inbound, pod-network only",
       "auth": "per-seam allowlist (*_CALLERS) plus Bearer; fail-closed boot on empty allowlists",
@@ -27,7 +38,8 @@
         "pod-network traffic only",
         "ports unpublished: expose, never ports:",
         "a container without its caller token does not start",
-        "a caller without the operation does not pass"
+        "a caller without the operation does not pass",
+        "an exposure block here proves the negative -- that these ports are not published -- and rule 4 wants that measured like any other"
       ],
       "refusal": "401/403 plus envelope to an unauthenticated or unallowlisted caller is designed behaviour, not an error path."
     },

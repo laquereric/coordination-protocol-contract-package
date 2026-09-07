@@ -62,6 +62,12 @@ VALID_DEPENDENCY = {
 }
 
 
+FOUR_DEFS = {"dependency": {"summary": "d"},
+             "pod_internal_dependencies": {"summary": "pd"},
+             "pod_internal_services": {"summary": "ps"},
+             "services": {"summary": "s"}}
+
+
 def build(index=VALID_INDEX, scope=VALID_SCOPE, scope_dir="services", files=()):
     d = tempfile.mkdtemp(prefix="plant-repo-format-")
     os.makedirs(os.path.join(d, ".cpcp"), exist_ok=True)
@@ -126,7 +132,7 @@ CASES = [
     # And the mirror: declared with no directory behind it.
     ("declared-scope-missing",
      lambda: build(index=edit(VALID_INDEX, "scopes.manifests",
-                              {"pod_internal": ".cpcp/pod_internal/package.json"})),
+                              {"pod_internal_services": ".cpcp/pod_internal_services/package.json"})),
      "not a file"),
 
     ("scope-name-not-a-scope",
@@ -138,7 +144,7 @@ CASES = [
 
     # The folder and the manifest must agree about which scope this is.
     ("scope-disagrees-with-directory",
-     lambda: build(scope=edit(VALID_SCOPE, "scope", "pod_internal")),
+     lambda: build(scope=edit(VALID_SCOPE, "scope", "pod_internal_services")),
      "must be the same"),
 
     ("scope-kind-wrong",
@@ -254,7 +260,7 @@ CASES = [
      lambda: build(scope=dict(VALID_SCOPE,
                               depends_on=[{"producer": "x", "operations": ["y"],
                                            "status": "published"}])),
-     "belongs in the dependency manifest"),
+     "belongs in a calling scope"),
 
     # A dependency scope asserts nothing about the producer's exposure.
     ("dependency-carrying-exposure",
@@ -267,21 +273,47 @@ CASES = [
     # ---- The published vocabulary must be complete and must invent nothing.
 
     ("scope-definitions-complete",
-     lambda: build(scope=dict(VALID_SCOPE, scope_definitions={
-         "dependency": {"summary": "d"}, "pod_internal": {"summary": "i"},
-         "services": {"summary": "s"}})),
+     lambda: build(scope=dict(VALID_SCOPE, scope_definitions=FOUR_DEFS)),
      None),
 
     ("scope-definitions-incomplete",
      lambda: build(scope=dict(VALID_SCOPE, scope_definitions={
-         "dependency": {"summary": "d"}, "services": {"summary": "s"}})),
-     "omits pod_internal"),
+         k: v for k, v in FOUR_DEFS.items() if k != "pod_internal_services"})),
+     "omits pod_internal_services"),
 
     ("scope-definitions-invented",
-     lambda: build(scope=dict(VALID_SCOPE, scope_definitions={
-         "dependency": {"summary": "d"}, "pod_internal": {"summary": "i"},
-         "services": {"summary": "s"}, "private": {"summary": "?"}})),
+     lambda: build(scope=dict(VALID_SCOPE,
+                              scope_definitions=dict(FOUR_DEFS, private={"summary": "?"}))),
      "which is not a scope"),
+
+    ("pod-internal-dependency-clean",
+     lambda: build(index=dict(VALID_INDEX, scopes={"manifests": {
+                       "pod_internal_dependencies":
+                           ".cpcp/pod_internal_dependencies/package.json"}}),
+                   scope=dict(VALID_DEPENDENCY, scope="pod_internal_dependencies"),
+                   scope_dir="pod_internal_dependencies"),
+     None),
+
+    ("pod-internal-dependency-carrying-seams",
+     lambda: build(index=dict(VALID_INDEX, scopes={"manifests": {
+                       "pod_internal_dependencies":
+                           ".cpcp/pod_internal_dependencies/package.json"}}),
+                   scope=dict(VALID_DEPENDENCY, scope="pod_internal_dependencies",
+                              seams=[{"id": "stub"}]),
+                   scope_dir="pod_internal_dependencies"),
+     "not 'seams'"),
+
+    # A seam entry repeats its own scope; only the manifest's was ever read,
+    # so a stale copy could contradict the folder it sat in.
+    ("seam-entry-scope-disagrees",
+     lambda: build(scope=dict(VALID_SCOPE, seams=[
+         {"id": "stub", "scope": "pod_internal_services"}])),
+     "cannot name a scope other than the manifest"),
+
+    ("seam-entry-scope-agrees",
+     lambda: build(scope=dict(VALID_SCOPE, seams=[
+         {"id": "stub", "scope": "services"}])),
+     None),
 
     # ONE caller is the bar. This must PASS, or the standard would be demanding
     # a demonstration from every package.
