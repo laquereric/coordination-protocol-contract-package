@@ -4,7 +4,7 @@
   "name": "coordination-protocol-contract-package",
   "description": "The CPCP contract home: envelopes, refusal taxonomy, idempotency, method conventions, layer authority, operation identity and scopes, plus the base OWL ontology.",
   "self_rev": "434ef847c883307caebaf0e18a1eb458a76c48b5",
-  "note": "The contract home carries spec/ and ontology/ instead of a demo of its own. It declares no seam and serves no route: nothing here is reachable at any scope. The layout every CPCP package repo follows, including the per-scope manifests, is specified in spec/repo-format.md; this repo serves no seam and therefore carries the index alone.",
+  "note": "The contract home carries spec/ and ontology/ instead of a demo of its own. It answers no RPC and serves no seam, but it does serve the scope vocabulary that every downstream .cpcp manifest cites -- so it carries a 'services' manifest whose seams list is empty and whose scope_definitions are the definition of record. The layout every CPCP package repo follows is specified in spec/repo-format.md.",
   "spec": {
     "background": "spec/background.md",
     "envelope": "spec/envelope.md",
@@ -36,44 +36,6 @@
     "source": "spec/scopes.md",
     "rule": "A scope answers which way the call runs, and how far. Outbound: this repo calls a CID somebody else serves (dependency). Inbound: this repo serves it, reachable beyond its pod (services) or only beside it (pod_internal). The method contract is identical at every scope; reach is not. A seam served both inside the pod and beyond appears in two manifests -- one seam under two rules, never two seams.",
     "change_rule": "Adding a scope to a seam is a contract change: update spec/scopes.md, the seam gate, and the demo matrix runner -- never just the compose file.",
-    "vocabulary": {
-      "dependency": {
-        "summary": "A CID this repo calls, served elsewhere.",
-        "direction": "outbound: entries are not seams of this repo",
-        "constraints": [
-          "names the producer, its CID, and the operations actually called",
-          "declared whether or not the operation is built yet; status records which",
-          "a non-published status carries a because saying how that was determined",
-          "no exposure block: exposure is the producer's to measure, not this repo's to assert"
-        ],
-        "invariant": "Adding a dependency obliges the producer to nothing it has not already published."
-      },
-      "pod_internal": {
-        "summary": "Served to containers beside this one.",
-        "direction": "inbound, pod-network only",
-        "auth": "per-seam allowlist (*_CALLERS) plus Bearer; fail-closed boot on empty allowlists",
-        "constraints": [
-          "pod-network traffic only",
-          "ports unpublished: expose, never ports:",
-          "a container without its caller token does not start",
-          "a caller without the operation does not pass"
-        ],
-        "refusal": "401/403 plus envelope to an unauthenticated or unallowlisted caller is designed behaviour, not an error path."
-      },
-      "services": {
-        "summary": "Served to callers beyond this pod.",
-        "direction": "inbound, reachable outside the pod",
-        "auth": "operator surfaces keep read-back asymmetry where it matters",
-        "constraints": [
-          "host-published loopback for operators, editors and browsers, and anything served to the open internet",
-          "how far a surface actually reaches is measured in its exposure block, not asserted by the scope name",
-          "no direct domain writes except through CPCP admission",
-          "where a surface is internet-reachable: no credentials, no real data, replay-safe to observe"
-        ],
-        "invariant": "Publishing a port never widens what the seam admits.",
-        "defect": "A public endpoint that admits a real write is a defect, not a demo."
-      }
-    },
     "method_map": [
       {
         "seam": "back",
@@ -169,7 +131,11 @@
         "seam": "switchyard-offline",
         "because": "Live in magentic-stack (switchyard.route, cpcp.ready, cid) but absent from the map above. Browser-local credential routing, not pod-network traffic, so none of the three scopes is obviously correct. Needs a contract decision."
       }
-    ]
+    ],
+    "definitions": ".cpcp/services/package.json#scope_definitions",
+    "manifests": {
+      "services": ".cpcp/services/package.json"
+    }
   },
   "gates": [
     "tooling/check-repo-format.py",

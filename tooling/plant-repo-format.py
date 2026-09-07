@@ -264,6 +264,25 @@ CASES = [
                    scope_dir="dependency"),
      "no 'exposure'"),
 
+    # ---- The published vocabulary must be complete and must invent nothing.
+
+    ("scope-definitions-complete",
+     lambda: build(scope=dict(VALID_SCOPE, scope_definitions={
+         "dependency": {"summary": "d"}, "pod_internal": {"summary": "i"},
+         "services": {"summary": "s"}})),
+     None),
+
+    ("scope-definitions-incomplete",
+     lambda: build(scope=dict(VALID_SCOPE, scope_definitions={
+         "dependency": {"summary": "d"}, "services": {"summary": "s"}})),
+     "omits pod_internal"),
+
+    ("scope-definitions-invented",
+     lambda: build(scope=dict(VALID_SCOPE, scope_definitions={
+         "dependency": {"summary": "d"}, "pod_internal": {"summary": "i"},
+         "services": {"summary": "s"}, "private": {"summary": "?"}})),
+     "which is not a scope"),
+
     # ONE caller is the bar. This must PASS, or the standard would be demanding
     # a demonstration from every package.
     ("cid-with-one-example",

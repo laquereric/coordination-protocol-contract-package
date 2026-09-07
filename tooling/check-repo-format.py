@@ -228,6 +228,27 @@ def check_scope_manifest(repo, scope_dir, rep):
             ids = [s.get("id") for s in seams if isinstance(s, dict)]
             rep.note("%s serves seams: %s" % (scope_dir, ", ".join(str(i) for i in ids)))
 
+    # Whoever publishes the vocabulary must publish ALL of it and nothing else.
+    # Downstream manifests cite this as their definition of record, so a missing
+    # or invented scope here is a definition a reader would resolve and act on.
+    defs = doc.get("scope_definitions")
+    if defs is not None:
+        if not isinstance(defs, dict):
+            rep.fail(rel, "scope_definitions must be an object keyed by scope name")
+        else:
+            missing = [s for s in SCOPES if s not in defs]
+            extra = [k for k in defs if k not in SCOPES]
+            if missing:
+                rep.fail(rel, "scope_definitions omits %s; a partial vocabulary is one a "
+                              "downstream reader resolves and comes up empty on"
+                         % ", ".join(missing))
+            if extra:
+                rep.fail(rel, "scope_definitions defines %s, which %s not a scope"
+                         % (", ".join(extra), "are" if len(extra) > 1 else "is"))
+            if not missing and not extra:
+                rep.note("%s publishes the scope vocabulary: %s"
+                         % (scope_dir, ", ".join(sorted(defs))))
+
     check_shas(doc, rel, rep)
     check_paths(doc, rel, repo, rep)
     return doc

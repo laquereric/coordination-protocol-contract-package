@@ -188,7 +188,30 @@ refusal. A checker nobody has watched fail is a guess about what it would do.
 
 ## This repo
 
-The contract home serves no seam and draws no route: an index and **no scope
-directories**, by rule 2's converse. A scope directory says *this repo serves
-that scope*, and three empty ones here would say something false. A repo that
-serves nothing carries the index alone.
+The contract home draws no route and answers no RPC, so it serves no seam. It
+carries one scope directory anyway — `services` — because it serves something
+every other repo depends on: **the scope vocabulary itself**.
+
+```text
+.cpcp/package.json            index; points at the definitions of record
+.cpcp/services/package.json   seams: [] with its because, and
+                              scope_definitions: the three scopes, defined
+```
+
+Every scope manifest in every repo carries `source: spec/scopes.md`. That
+citation resolves to prose. `scope_definitions` is the same citation a machine
+can read, so a downstream reader gets the definition rather than a pointer to
+a document about it.
+
+It lives in exactly one file. It was in the index as well until keeping both in
+step became the reader's problem rather than the format's — a second copy of a
+definition is a second thing to drift. The index points; the manifest defines.
+
+`pod_internal` and `dependency` have no directory here: this repo serves nothing
+on a pod network and calls nothing. A scope directory asserts a relation, and
+two empty ones would assert two false ones.
+
+**Publishing the vocabulary is all-or-nothing.** A manifest carrying
+`scope_definitions` must define every scope and invent none — a partial
+vocabulary is one a downstream reader resolves and comes up empty on.
+*Test: a missing or unknown scope key fails.*
