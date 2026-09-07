@@ -78,7 +78,8 @@ carrying `seams`, or a serving manifest carrying `depends_on`, fails.
    *Test: an `unscoped_seams` entry without a `because` fails.*
 
 4. **Exposure is measured.** Read published ports from the deployment files and
-   record which file. Restating the method-to-scope map is not evidence.
+   record which file. Restating what the scope is supposed to mean is not
+   evidence; only reading what the deployment does is.
    *Test: an `exposure` block without `evidence` fails. Whether the citation is
    TRUE is not decidable here — a wrong line number is still a wrong line number.*
 
@@ -118,13 +119,15 @@ A bare string in `cids` declares no caller and fails rule 7.
 
 ```json
 "depends_on": [
-  { "producer": "https://magenticmarket.ai/_cpcp",
-    "cid": "https://magenticmarket.ai/_cpcp/cid.json",
-    "operations": ["contextframe.list"],
+  { "producer": "https://example.test/_cpcp",
+    "cid": "https://example.test/_cpcp/cid.json",
+    "operations": ["thing.list"],
     "status": "unbuilt",
-    "because": "the CID publishes build.list, build.get and build.create; contextframe.list refuses unknown_operation" }
+    "because": "the CID publishes other.list and other.get; thing.list refuses unknown_operation" }
 ]
 ```
+
+A live one is in note [1].
 
 ## Optional
 
@@ -144,21 +147,20 @@ Prose that restates a CID is a second source of truth that will drift from the
 first. Write it if it helps a reader; do not write it to satisfy this format,
 and never let it stand in for a CID or a caller.
 
-## Worked example
+## Two shapes
 
-`magentic-stack` serves seams and calls none, so it carries the serving
-scopes and no `dependency`:
+A repo that serves and calls nothing carries the serving scopes and no
+`dependency`:
 
 ```text
-.cpcp/package.json                index; registry by SHA; switchyard-offline
-                                  under unscoped_seams with its because
-.cpcp/pod_internal_services/package.json
-                                  back, vault, bus, persist, mind
-.cpcp/services/package.json       back (host), plus published surfaces that
-                                  are not seams
+.cpcp/package.json                index; registry by SHA; any unscoped
+                                  seam with its because
+.cpcp/pod_internal_services/...   the seams it serves on the pod network
+.cpcp/services/package.json       the seams it serves beyond the pod,
+                                  plus published surfaces that are not seams
 ```
 
-`back` appears in two scope manifests, by rule 1.
+A seam served at both reaches appears in both, by rule 1.
 
 A repo that only calls carries the mirror image — one `dependency`
 manifest and no serving scopes:
@@ -171,7 +173,8 @@ manifest and no serving scopes:
 
 Neither shape is incomplete. A missing scope directory says *this repo
 does not stand in that relation*, which is why rule 2 makes an empty one
-say what fills the gap instead.
+say what fills the gap instead. Both shapes are filled in against real
+repos in note [1].
 
 ## The test
 
@@ -217,3 +220,29 @@ two empty ones would assert two false ones.
 `scope_definitions` must define every scope and invent none — a partial
 vocabulary is one a downstream reader resolves and comes up empty on.
 *Test: a missing or unknown scope key fails.*
+
+---
+
+## Notes
+
+Repos named here are illustration, not specification. CPCP is not any one
+of them.
+
+**[1] Both shapes, filled in.**
+
+[magentic-stack](https://github.com/laquereric/magentic-stack) serves and calls
+nothing, so it carries `pod_internal_services` (its `back`, `vault`, `bus`,
+`persist` and `mind` seams), `services` (`back` again at host reach, plus
+published surfaces that are not seams), and no `dependency`. Its `back` in two
+manifests is rule 1.
+
+[express-meaning](https://github.com/laquereric/express-meaning) is the mirror:
+one `dependency` manifest naming an operation its producer has not built yet,
+and no serving scopes at all.
+
+[magentic-market-ai-site](https://github.com/laquereric/magentic-market-ai-site)
+carries both serving scopes for a single seam reached two ways.
+
+[cpcp_demo](https://github.com/laquereric/cpcp_demo) serves one seam at
+`services` and carries an empty `pod_internal_services` whose `because` says it
+joins no pod network — rule 2 in use.

@@ -33,7 +33,7 @@
     "pod_internal_services": {
       "summary": "Served to containers beside this one.",
       "direction": "inbound, pod-network only",
-      "auth": "per-seam allowlist (*_CALLERS) plus Bearer; fail-closed boot on empty allowlists",
+      "auth": "per-seam allowlist plus a credential the deployment issues out of band; where boot is fail-closed, a container without its credential does not start",
       "constraints": [
         "pod-network traffic only",
         "ports unpublished: expose, never ports:",

@@ -50,9 +50,11 @@ given the evidence to answer.
 
 One grant, two faces, different obligations. PULL and PUSH are the mechanism;
 read access and write access are what they mean. Data direction, stated
-once: PULL means FRONT reads from BACK; PUSH means FRONT publishes to
-BACK. (HTTP requests travel caller-to-seam in both cases; the arrows
-above are data flow, not transport.)
+once: PULL means the caller reads from the seam; PUSH means the caller
+publishes to it. (HTTP requests travel caller-to-seam in both cases; the
+arrows above are data flow, not transport.) Deployments that name their
+roles — a client pod and the pod serving the seam — are naming their own
+topology, not a CPCP one; this contract knows only callers and seams.
 
 ## What a CPCP is
 

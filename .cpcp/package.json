@@ -35,106 +35,110 @@
   "scopes": {
     "source": "spec/scopes.md",
     "rule": "A scope answers two questions at once: which way the call runs, and how far. Calls beyond the pod: dependency. Calls within it: pod_internal_dependencies. Serves beyond the pod: services. Serves within it: pod_internal_services. Direction decides the field -- a calling scope carries depends_on, a serving scope carries seams. The method contract is identical at every scope; reach is not.",
-    "change_rule": "Adding a scope to a seam is a contract change: update spec/scopes.md, the seam gate, and the demo matrix runner -- never just the compose file.",
-    "method_map": [
-      {
-        "seam": "back",
-        "methods": [
-          "note.*",
-          "journal/session/graph operations"
-        ],
-        "scopes": [
-          "pod_internal_services",
-          "services"
-        ],
-        "note": "pod BACK plus host BACK"
-      },
-      {
-        "seam": "vault",
-        "methods": [
-          "vault.secret.put",
-          "vault.secret.list",
-          "vault.secret.get"
-        ],
-        "scopes": [
-          "pod_internal_services"
-        ],
-        "note": "config and switch callers"
-      },
-      {
-        "seam": "bus",
-        "methods": [
-          "bus.projection.latest"
-        ],
-        "scopes": [
-          "pod_internal_services"
-        ],
-        "note": "no production caller yet"
-      },
-      {
-        "seam": "persist",
-        "methods": [
-          "persist.path.set",
-          "persist.path.get"
-        ],
-        "scopes": [
-          "pod_internal_services"
-        ],
-        "note": "config-admin caller"
-      },
-      {
-        "seam": "mind",
-        "methods": [
-          "mind.reading.latest",
-          "mind.cognition.request",
-          "mind.up"
-        ],
-        "scopes": [
-          "pod_internal_services"
-        ],
-        "note": "conformance, debug"
-      },
-      {
-        "seam": "switch data",
-        "methods": [
-          "/v1/* completions"
-        ],
-        "scopes": [
-          "pod_internal_services"
-        ],
-        "note": "MIND only; browsers rejected"
-      },
-      {
-        "seam": "switch UI",
-        "methods": [
-          "/api/* sources/refresh/verify/test"
-        ],
-        "scopes": [
-          "pod_internal_services"
-        ],
-        "note": "config-admin display; host port retired"
-      },
-      {
-        "seam": "demo stub",
-        "methods": [
-          "note.list",
-          "note.create"
-        ],
-        "scopes": [
-          "services"
-        ],
-        "note": "evaporating state only"
-      }
-    ],
-    "unmapped": [
-      {
-        "seam": "switchyard-offline",
-        "because": "Live in magentic-stack (switchyard.route, cpcp.ready, cid) but absent from the map above. Browser-local credential routing, not pod-network traffic, so none of the three scopes is obviously correct. Needs a contract decision."
-      }
-    ],
+    "change_rule": "Adding a scope to a seam is a contract change: update the seam's gate and whatever runs its conformance matrix, never just the compose file.",
     "definitions": ".cpcp/services/package.json#scope_definitions",
     "manifests": {
       "services": ".cpcp/services/package.json"
+    },
+    "worked_example": {
+      "of": "https://github.com/laquereric/magentic-stack",
+      "note": "Illustration, not specification. CPCP is not this deployment; another one's map would name entirely different seams and be equally correct. Kept because a shape is easier to read from one filled-in example than from prose. See spec/scopes.md note [1].",
+      "method_map": [
+        {
+          "seam": "back",
+          "methods": [
+            "note.*",
+            "journal/session/graph operations"
+          ],
+          "scopes": [
+            "pod_internal_services",
+            "services"
+          ],
+          "note": "pod BACK plus host BACK"
+        },
+        {
+          "seam": "vault",
+          "methods": [
+            "vault.secret.put",
+            "vault.secret.list",
+            "vault.secret.get"
+          ],
+          "scopes": [
+            "pod_internal_services"
+          ],
+          "note": "config and switch callers"
+        },
+        {
+          "seam": "bus",
+          "methods": [
+            "bus.projection.latest"
+          ],
+          "scopes": [
+            "pod_internal_services"
+          ],
+          "note": "no production caller yet"
+        },
+        {
+          "seam": "persist",
+          "methods": [
+            "persist.path.set",
+            "persist.path.get"
+          ],
+          "scopes": [
+            "pod_internal_services"
+          ],
+          "note": "config-admin caller"
+        },
+        {
+          "seam": "mind",
+          "methods": [
+            "mind.reading.latest",
+            "mind.cognition.request",
+            "mind.up"
+          ],
+          "scopes": [
+            "pod_internal_services"
+          ],
+          "note": "conformance, debug"
+        },
+        {
+          "seam": "switch data",
+          "methods": [
+            "/v1/* completions"
+          ],
+          "scopes": [
+            "pod_internal_services"
+          ],
+          "note": "MIND only; browsers rejected"
+        },
+        {
+          "seam": "switch UI",
+          "methods": [
+            "/api/* sources/refresh/verify/test"
+          ],
+          "scopes": [
+            "pod_internal_services"
+          ],
+          "note": "config-admin display; host port retired"
+        },
+        {
+          "seam": "demo stub",
+          "methods": [
+            "note.list",
+            "note.create"
+          ],
+          "scopes": [
+            "services"
+          ],
+          "note": "evaporating state only"
+        }
+      ],
+      "unmapped": [
+        {
+          "seam": "switchyard-offline",
+          "because": "Live in magentic-stack (switchyard.route, cpcp.ready, cid) but absent from the map above. Browser-local credential routing, not pod-network traffic, so none of the three scopes is obviously correct. Needs a contract decision."
+        }
+      ]
     }
   },
   "gates": [
