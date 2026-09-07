@@ -32,7 +32,9 @@ Every requirement below names the test that decides it. The test is
 
 | Field | When | Test |
 |---|---|---|
-| `kind` | always | one of `cpcp-contract`, `cpcp-registry`, `cpcp-demo`, `cpcp-application` |
+| `kind` | always | one of six ([kinds](kinds.md)) |
+| `reference_instance` | `language_implementation_template` | resolvable CID URL + operations + liveness — see rule 10 |
+| `deploys` | `deployment` | each entry pins the application it runs by `repo` and `rev` |
 | `version` | always | equals `1` |
 | `name`, `description` | always | non-empty |
 | `contract` | every repo except the contract home | `{repo, rev}`, both non-empty |
@@ -60,7 +62,7 @@ what it depends on, and one field meaning both would make a manifest
 readable only by knowing which folder it sat in. A `dependency` manifest
 carrying `seams`, or a serving manifest carrying `depends_on`, fails.
 
-### Nine rules
+### Ten rules
 
 1. **One seam, many scopes.** A seam appears in every scope manifest it is
    reachable at. Identical method contract, different exposure — one seam under
@@ -147,6 +149,29 @@ A live one is in note [1].
           "separate_containers": true }
 ```
 
+10. **A template resolves to a running service.** A
+   `language_implementation_template` declares `reference_instance` with an
+   absolute, fetchable `cid` URL, the `operations` it claims that instance
+   publishes, and a `liveness` of `required` or `advisory` (`advisory` needs a
+   `because`). An agent that finds a template must be able to reach what serves
+   the endpoints it describes — a template describing a seam that exists
+   nowhere is a shape with no referent, and the agent cannot tell a live
+   contract from an aspirational one. Being a starting point is not an
+   exemption from pointing at something that runs; it is the reason to.
+   *Test: a template with no `reference_instance` fails; a `cid` that is a path
+   rather than a URL fails; missing `operations` fails; an unknown `liveness`
+   fails; `advisory` without a `because` fails, so an outage cannot read as a
+   passing check. Whether the instance really publishes those operations is not
+   decidable here — the template's own validator fetches the CID and compares.*
+
+```json
+"reference_instance": {
+  "repo": "https://github.com/owner/app", "rev": "<full sha>",
+  "cid": "https://app.example/_cpcp/cid.json",
+  "operations": ["thing.list"], "liveness": "required"
+}
+```
+
 ## Optional
 
 None of this is required, and a repo without it conforms.
@@ -202,7 +227,7 @@ python3 tooling/check-repo-format.py [REPO ...]
 
 No argument checks the contract home; otherwise point it at any package repo, or
 several. It reads only `.cpcp/` and the paths that manifest declares. It also
-resolves declared paths against the tree — not one of the nine rules, and it
+resolves declared paths against the tree — not one of the ten rules, and it
 earns its place: a manifest naming a file that does not exist is how a manifest
 and its repo drift apart when files move.
 

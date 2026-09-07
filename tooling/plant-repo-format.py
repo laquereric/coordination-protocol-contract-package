@@ -288,6 +288,72 @@ CASES = [
          "name": "FRONT", "doc": "docs/architecture/OVERVIEW.md"})),
      "does not exist in this repo"),
 
+    # ---- Rule 10: a template resolves to a running service.
+
+    ("template-with-reference", lambda: build(index=dict(
+        VALID_INDEX, kind="language_implementation_template",
+        reference_instance={"cid": "https://example.test/_cpcp/cid.json",
+                            "operations": ["thing.list"], "liveness": "required"})),
+     None),
+
+    ("template-without-reference", lambda: build(index=dict(
+        VALID_INDEX, kind="language_implementation_template")),
+     "declares no reference_instance"),
+
+    # A path is not a referent: the reader this rule exists for is outside the
+    # checkout and cannot resolve it.
+    ("template-reference-is-a-path", lambda: build(index=dict(
+        VALID_INDEX, kind="language_implementation_template",
+        reference_instance={"cid": "cid/note.cid.json", "operations": ["a.b"],
+                            "liveness": "required"})),
+     "not a path"),
+
+    ("template-reference-no-operations", lambda: build(index=dict(
+        VALID_INDEX, kind="language_implementation_template",
+        reference_instance={"cid": "https://example.test/_cpcp/cid.json",
+                            "liveness": "required"})),
+     "names no 'operations'"),
+
+    ("template-reference-bad-liveness", lambda: build(index=dict(
+        VALID_INDEX, kind="language_implementation_template",
+        reference_instance={"cid": "https://example.test/_cpcp/cid.json",
+                            "operations": ["a.b"], "liveness": "maybe"})),
+     "expected one of"),
+
+    # An outage must not read as a passing check.
+    ("template-advisory-without-because", lambda: build(index=dict(
+        VALID_INDEX, kind="language_implementation_template",
+        reference_instance={"cid": "https://example.test/_cpcp/cid.json",
+                            "operations": ["a.b"], "liveness": "advisory"})),
+     "has to say why"),
+
+    ("template-advisory-with-because", lambda: build(index=dict(
+        VALID_INDEX, kind="language_implementation_template",
+        reference_instance={"cid": "https://example.test/_cpcp/cid.json",
+                            "operations": ["a.b"], "liveness": "advisory",
+                            "because": "nothing deployed yet"})),
+     None),
+
+    # ---- deployment: names what it runs, by repo and revision.
+
+    ("deployment-with-deploys", lambda: build(index=dict(
+        VALID_INDEX, kind="deployment",
+        deploys=[{"repo": "https://github.com/x/y",
+                  "rev": "3b9ce9b3b4e788b961e4332bfbe0949ec2d31c2e"}])),
+     None),
+
+    ("deployment-without-deploys", lambda: build(index=dict(VALID_INDEX, kind="deployment")),
+     "declares no 'deploys'"),
+
+    ("deployment-entry-without-rev", lambda: build(index=dict(
+        VALID_INDEX, kind="deployment", deploys=[{"repo": "https://github.com/x/y"}])),
+     "has no 'rev'"),
+
+    # 'deploys' in a repo that is not a deployment is a claim about the wrong kind.
+    ("deploys-on-an-application", lambda: build(index=dict(
+        VALID_INDEX, deploys=[{"repo": "https://github.com/x/y", "rev": "a"*40}])),
+     "belongs to a deployment"),
+
     # ---- Rule 9: a declared role names one of the four.
 
     ("role-valid", lambda: build(index=dict(VALID_INDEX,

@@ -11,6 +11,7 @@
     "http-mapping": "spec/http-mapping.md",
     "idempotency": "spec/idempotency.md",
     "identity": "spec/identity.md",
+    "kinds": "spec/kinds.md",
     "layers": "spec/layers.md",
     "methods": "spec/methods.md",
     "refusals": "spec/refusals.md",

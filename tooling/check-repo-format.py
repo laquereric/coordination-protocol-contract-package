@@ -34,7 +34,15 @@ import os
 import re
 import sys
 
-KINDS = ("cpcp-contract", "cpcp-registry", "cpcp-demo", "cpcp-application")
+KINDS = ("cpcp-contract", "cpcp-registry", "cpcp-demo", "cpcp-application",
+         "deployment", "language_implementation_template")
+
+# A template is copied, not run: it has no exposure to measure and no live seam.
+# That makes it the kind most likely to rot into a plausible skeleton nobody has
+# executed, which is what rule 10 is for.
+TEMPLATE_KIND = "language_implementation_template"
+DEPLOYMENT_KIND = "deployment"
+LIVENESS = ("required", "advisory")
 # Direction x reach. Both axes are named, so neither has to be inferred.
 #
 #                      calls (outbound)            serves (inbound)
@@ -256,6 +264,82 @@ def check_role(index, rel, rep):
         rep.note("role: %s%s" % (name, extra))
 
 
+def check_reference_instance(index, rel, rep):
+    """Rule 10: a template resolves to a running service.
+
+    An agent that finds a template must be able to REACH what serves the
+    endpoints it describes. A template describing a seam that exists nowhere is
+    a shape with no referent -- the agent cannot see a real response, cannot
+    check a client against one, and cannot tell a live contract from an
+    aspirational one.
+    """
+    ref = index.get("reference_instance")
+    if index.get("kind") == TEMPLATE_KIND and ref is None:
+        rep.fail(rel, "a %s declares no reference_instance; being a starting point is "
+                      "not an exemption from pointing at something that runs, it is the "
+                      "reason to (rule 10)" % TEMPLATE_KIND)
+        return
+    if ref is None:
+        return
+    if not isinstance(ref, dict):
+        rep.fail(rel, "reference_instance must be an object (rule 10)")
+        return
+
+    cid = str(ref.get("cid", "")).strip()
+    if not cid:
+        rep.fail(rel, "reference_instance has no 'cid' (rule 10)")
+    elif not cid.startswith(("http://", "https://")):
+        # A path is not a referent: a reader outside this checkout cannot
+        # resolve it, and the reader this rule exists for is outside.
+        rep.fail(rel, "reference_instance.cid is %r; it must be an absolute URL an "
+                      "agent can fetch, not a path (rule 10)" % cid)
+
+    ops = ref.get("operations")
+    if not isinstance(ops, list) or not ops:
+        rep.fail(rel, "reference_instance names no 'operations'; a CID with no claim "
+                      "about what it publishes is nothing to check against (rule 10)")
+
+    liveness = str(ref.get("liveness", "")).strip()
+    if liveness not in LIVENESS:
+        rep.fail(rel, "reference_instance.liveness is %r; expected one of %s (rule 10)"
+                 % (ref.get("liveness"), ", ".join(LIVENESS)))
+    elif liveness == "advisory" and not str(ref.get("because", "")).strip():
+        # A reference expected to be unreachable is a real case; letting a
+        # network failure read as a pass is not.
+        rep.fail(rel, "reference_instance.liveness is 'advisory' with no 'because'; a "
+                      "reference that may be unreachable has to say why, or an outage "
+                      "reads as a passing check (rule 10)")
+
+    if isinstance(ops, list) and ops:
+        rep.note("reference instance: %s (%s, %s)"
+                 % (cid or "?", ", ".join(str(o) for o in ops), liveness or "?"))
+
+
+def check_deploys(index, rel, rep):
+    """A deployment repo names what it runs, by repo and revision."""
+    if index.get("kind") != DEPLOYMENT_KIND:
+        if "deploys" in index:
+            rep.fail(rel, "'deploys' belongs to a %s; this repo is %r"
+                     % (DEPLOYMENT_KIND, index.get("kind")))
+        return
+
+    entries = index.get("deploys")
+    if not isinstance(entries, list) or not entries:
+        rep.fail(rel, "a %s declares no 'deploys'; the repo whose subject is running "
+                      "things has to name what it runs" % DEPLOYMENT_KIND)
+        return
+    for i, e in enumerate(entries):
+        where = "deploys[%d]" % i
+        if not isinstance(e, dict):
+            rep.fail(rel, "%s must be an object" % where)
+            continue
+        for field in ("repo", "rev"):
+            if not str(e.get(field, "")).strip():
+                rep.fail(rel, "%s has no %r; only a deployment knows WHERE an "
+                              "application runs, so it pins WHAT it runs" % (where, field))
+    rep.note("deploys: %d application(s)" % len(entries))
+
+
 def check_scope_manifest(repo, scope_dir, rep):
     rel = os.path.join(".cpcp", scope_dir, "package.json")
     full = os.path.join(repo, rel)
@@ -471,6 +555,8 @@ def check_repo(repo):
 
     check_cids(index, index_rel, repo, rep)
     check_role(index, index_rel, rep)
+    check_reference_instance(index, index_rel, rep)
+    check_deploys(index, index_rel, rep)
 
     for entry in index.get("unscoped_seams", []) or []:
         if isinstance(entry, dict) and not str(entry.get("because", "")).strip():
