@@ -34,22 +34,23 @@
   },
   "scopes": {
     "source": "spec/scopes.md",
-    "rule": "Every CPCP seam is reachable at exactly one scope. The method contract is identical at every scope; exposure is not. A method reachable at two scopes is the same method under two exposure rules, never two methods.",
+    "rule": "A scope answers which way the call runs, and how far. Outbound: this repo calls a CID somebody else serves (dependency). Inbound: this repo serves it, reachable beyond its pod (services) or only beside it (pod_internal). The method contract is identical at every scope; reach is not. A seam served both inside the pod and beyond appears in two manifests -- one seam under two rules, never two seams.",
     "change_rule": "Adding a scope to a seam is a contract change: update spec/scopes.md, the seam gate, and the demo matrix runner -- never just the compose file.",
     "vocabulary": {
-      "public_cpcp": {
-        "summary": "Exposed to public, like the demo.",
-        "auth": "none; refusals still apply, unknown methods refuse everywhere",
+      "dependency": {
+        "summary": "A CID this repo calls, served elsewhere.",
+        "direction": "outbound: entries are not seams of this repo",
         "constraints": [
-          "no credentials",
-          "no real data",
-          "no published ports beyond operator loopback",
-          "replay-safe to observe: reads only, or writes against evaporating demo state"
+          "names the producer, its CID, and the operations actually called",
+          "declared whether or not the operation is built yet; status records which",
+          "a non-published status carries a because saying how that was determined",
+          "no exposure block: exposure is the producer's to measure, not this repo's to assert"
         ],
-        "defect": "A public endpoint that admits a real write is a defect, not a demo."
+        "invariant": "Adding a dependency obliges the producer to nothing it has not already published."
       },
-      "pod_internal_cpcp": {
-        "summary": "Exposed to coordinate containers.",
+      "pod_internal": {
+        "summary": "Served to containers beside this one.",
+        "direction": "inbound, pod-network only",
         "auth": "per-seam allowlist (*_CALLERS) plus Bearer; fail-closed boot on empty allowlists",
         "constraints": [
           "pod-network traffic only",
@@ -59,15 +60,18 @@
         ],
         "refusal": "401/403 plus envelope to an unauthenticated or unallowlisted caller is designed behaviour, not an error path."
       },
-      "pod_external_cpcp": {
-        "summary": "Exposed within the ecosystem.",
+      "services": {
+        "summary": "Served to callers beyond this pod.",
+        "direction": "inbound, reachable outside the pod",
         "auth": "operator surfaces keep read-back asymmetry where it matters",
         "constraints": [
-          "host-published loopback for operators, editors and browsers",
-          "reachable from the host, never from the open internet",
-          "no direct domain writes except through CPCP admission"
+          "host-published loopback for operators, editors and browsers, and anything served to the open internet",
+          "how far a surface actually reaches is measured in its exposure block, not asserted by the scope name",
+          "no direct domain writes except through CPCP admission",
+          "where a surface is internet-reachable: no credentials, no real data, replay-safe to observe"
         ],
-        "invariant": "Publishing a port never widens what the seam admits."
+        "invariant": "Publishing a port never widens what the seam admits.",
+        "defect": "A public endpoint that admits a real write is a defect, not a demo."
       }
     },
     "method_map": [
@@ -78,8 +82,8 @@
           "journal/session/graph operations"
         ],
         "scopes": [
-          "pod_internal_cpcp",
-          "pod_external_cpcp"
+          "pod_internal",
+          "services"
         ],
         "note": "pod BACK plus host BACK"
       },
@@ -91,7 +95,7 @@
           "vault.secret.get"
         ],
         "scopes": [
-          "pod_internal_cpcp"
+          "pod_internal"
         ],
         "note": "config and switch callers"
       },
@@ -101,7 +105,7 @@
           "bus.projection.latest"
         ],
         "scopes": [
-          "pod_internal_cpcp"
+          "pod_internal"
         ],
         "note": "no production caller yet"
       },
@@ -112,7 +116,7 @@
           "persist.path.get"
         ],
         "scopes": [
-          "pod_internal_cpcp"
+          "pod_internal"
         ],
         "note": "config-admin caller"
       },
@@ -124,7 +128,7 @@
           "mind.up"
         ],
         "scopes": [
-          "pod_internal_cpcp"
+          "pod_internal"
         ],
         "note": "conformance, debug"
       },
@@ -134,7 +138,7 @@
           "/v1/* completions"
         ],
         "scopes": [
-          "pod_internal_cpcp"
+          "pod_internal"
         ],
         "note": "MIND only; browsers rejected"
       },
@@ -144,7 +148,7 @@
           "/api/* sources/refresh/verify/test"
         ],
         "scopes": [
-          "pod_internal_cpcp"
+          "pod_internal"
         ],
         "note": "config-admin display; host port retired"
       },
@@ -155,7 +159,7 @@
           "note.create"
         ],
         "scopes": [
-          "public_cpcp"
+          "services"
         ],
         "note": "evaporating state only"
       }

@@ -78,15 +78,18 @@ start at `.cpcp/package.json`; humans start at `README.md`.
 ```text
 .cpcp/package.json            index: kind, version, contract rev, registry
                               by SHA, unscoped seams, gates
-.cpcp/<scope>/package.json    one per scope the repo SERVES: its definition,
-                              seams, measured exposure, invariants
+.cpcp/<scope>/package.json    one per scope the repo STANDS IN. Serving
+                              (services, pod_internal): definition, seams,
+                              measured exposure, invariants. Calling
+                              (dependency): the CIDs it calls, each with
+                              its producer and a built/unbuilt status
 demo/                         CIDs (*.cid.json), stub seam (server), matrix
                               runner, shape check, canonical shapes
 languages/<lang>/             README plus examples/{push,pull} clients
 ```
 
 Full rules, field tables and a worked example: [repo format](spec/repo-format.md).
-A repo that serves no seam carries the index alone.
+A repo that neither serves nor calls carries the index alone.
 
 This repo (the contract home) carries `spec/`, `ontology/`,
 and `PROVENANCE.json` instead of a demo of its own: the demo lives in

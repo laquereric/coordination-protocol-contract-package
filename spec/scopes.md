@@ -1,24 +1,33 @@
 # Scopes
 
-Every CPCP seam is reachable at exactly one scope. Scope decides who may
-call, over what network, with what credential — the method contract is
-identical at every scope, but exposure is not. A method reachable at two
-scopes (e.g. BACK's seam inside the pod and on the host) is the same
-method under two exposure rules, never two methods.
+A scope answers **which way the call runs, and how far**.
+
+* Outbound — this repo calls a CID somebody else serves: `dependency`.
+* Inbound — this repo serves the function itself: `services` if callers
+  outside its pod can reach it, `pod_internal` if only containers beside
+  it can.
+
+The method contract is identical at every scope; reach is not. A seam
+served both inside the pod and beyond it appears in **two** manifests —
+one seam under two rules, never two seams (repo-format rule 1). A repo
+that only calls and never serves has a `dependency` manifest and no
+others; a repo that only serves has no `dependency` manifest.
 
 ## The three scopes
 
-### `public_cpcp` — exposed to public, like the demo
+### `dependency` — a CID this repo calls, served elsewhere
 
-* No credentials, no real data, no published ports beyond loopback on
-  the operator's own machine. The reference surface is the demo stub
-  plus the language examples pointed at it.
-* Anything public must be replay-safe to observe: reads only, or writes
-  against evaporating demo state. A public endpoint that admits a real
-  write is a defect, not a demo.
-* Auth: none. Refusals still apply (unknown methods refuse everywhere).
+* Entries are **not seams of this repo**. They name a producer, the CID
+  that describes it, and the operations this repo actually calls. The
+  producer is somebody else's `services` scope.
+* Declare an operation here whether or not it is built yet. A dependency
+  on an unpublished operation is a real dependency and the most useful
+  one to write down — `status` records which, and `because` says how it
+  was determined.
+* No exposure block: exposure is the producer's property to measure and
+  state, not this repo's to assert.
 
-### `pod_internal_cpcp` — exposed to coordinate containers
+### `pod_internal` — served to containers beside this one
 
 * Pod-network traffic between containers: BACK, BACKJOB, vault, bus,
   persist, MIND's seam, switch data plane, graph. Ports unpublished
@@ -29,28 +38,48 @@ method under two exposure rules, never two methods.
 * Refusal to an unauthenticated or unallowlisted caller is 401/403 plus
   envelope — designed behavior, not an error path.
 
-### `pod_external_cpcp` — exposed within the ecosystem
+### `services` — served to callers beyond this pod
 
-* Host-published loopback surfaces for operators, editors, and browsers:
-  FRONT page, host BACK (`/_cpcp` for editor shells and curl), config UI.
-  Reachable from the host, never from the open internet.
+* Everything this repo serves that something outside its pod can reach:
+  host-published loopback for operators, editors and browsers (FRONT
+  page, host BACK, config UI), and anything served to the open internet.
+* **How far it actually reaches is measured, not assumed.** Loopback and
+  internet-facing are both `services`; which one a surface is belongs in
+  its `exposure` block with evidence naming the file it was read from
+  (repo-format rule 4). A published port never widens what the seam
+  admits.
 * Operator surfaces keep read-back asymmetry where it matters
   (config-admin writes secrets it can never read back).
-* No direct domain writes except through CPCP admission — publishing a
-  port never widens what the seam admits.
+
+### Where "public" went
+
+`public` was a scope until it was two claims wearing one name: *this repo
+serves it* and *the open internet can reach it*. The first is
+`services`. The second is exposure, which rule 4 already requires to be
+measured — and measuring it is what caught four ports asserting loopback
+while bound to `0.0.0.0`. A scope name cannot be measured; an exposure
+block can.
+
+Public still carries its own obligations wherever a `services` surface is
+internet-reachable: no credentials, no real data, replay-safe to observe.
+A public endpoint that admits a real write is a defect, not a demo.
 
 ## Method-to-scope map
 
 | Seam | Methods | Scopes |
 |---|---|---|
-| back | `note.*`, journal/session/graph operations | pod_internal (pod BACK) + pod_external (host BACK) |
+| back | `note.*`, journal/session/graph operations | pod_internal (pod BACK) + services (host BACK) |
 | vault | `vault.secret.put/list/get` | pod_internal (config, switch callers) |
 | bus | `bus.projection.latest` | pod_internal (no production caller yet) |
 | persist | `persist.path.set/get` | pod_internal (config-admin caller) |
 | mind | `mind.reading.latest`, `mind.cognition.request`, `mind.up` | pod_internal (conformance, debug) |
 | switch data | `/v1/*` completions | pod_internal (MIND only; browsers rejected) |
 | switch UI | `/api/*` sources/refresh/verify/test | pod_internal (config-admin display; host port retired) |
-| demo stub | `note.list`, `note.create` | public (evaporating state only) |
+| demo stub | `note.list`, `note.create` | services (internet-reachable; evaporating state only) |
 
 Adding a scope to a seam is a contract change: update this table, the
 seam's gate, and the demo matrix runner — never just the compose file.
+
+Adding a `dependency` is a contract change on the **caller's** side only.
+It records what this repo has come to rely on; it obliges the producer
+to nothing it has not already published.

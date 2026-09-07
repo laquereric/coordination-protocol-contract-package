@@ -28,21 +28,41 @@ VALID_INDEX = {
         "repo": "https://github.com/laquereric/coordination-protocol-contract-package",
         "rev": "3b9ce9b3b4e788b961e4332bfbe0949ec2d31c2e",
     },
-    "scopes": {"manifests": {"public_cpcp": ".cpcp/public_cpcp/package.json"}},
+    "scopes": {"manifests": {"services": ".cpcp/services/package.json"}},
 }
 
 VALID_SCOPE = {
     "kind": "cpcp-scope",
-    "scope": "public_cpcp",
+    "scope": "services",
     "of": "planted",
-    "definition": "exposed to public, like the demo",
+    "definition": "served to callers beyond this pod",
     "source": "spec/scopes.md",
     "seams": [{"id": "stub", "methods": ["note.list"]}],
     "exposure": {"measured": True, "evidence": "seam/server.py:1 -- binds loopback"},
 }
 
+# The outbound scope: this repo CALLS these, and something else serves them.
+DEPENDENCY_INDEX = dict(
+    VALID_INDEX,
+    scopes={"manifests": {"dependency": ".cpcp/dependency/package.json"}},
+)
 
-def build(index=VALID_INDEX, scope=VALID_SCOPE, scope_dir="public_cpcp", files=()):
+VALID_DEPENDENCY = {
+    "kind": "cpcp-scope",
+    "scope": "dependency",
+    "of": "planted",
+    "definition": "CIDs this repo calls, served elsewhere",
+    "source": "spec/scopes.md",
+    "depends_on": [{
+        "producer": "https://example.test/_cpcp",
+        "cid": "https://example.test/_cpcp/cid.json",
+        "operations": ["note.list"],
+        "status": "published",
+    }],
+}
+
+
+def build(index=VALID_INDEX, scope=VALID_SCOPE, scope_dir="services", files=()):
     d = tempfile.mkdtemp(prefix="plant-repo-format-")
     os.makedirs(os.path.join(d, ".cpcp"), exist_ok=True)
     with open(os.path.join(d, ".cpcp/package.json"), "w", encoding="utf-8") as fh:
@@ -106,7 +126,7 @@ CASES = [
     # And the mirror: declared with no directory behind it.
     ("declared-scope-missing",
      lambda: build(index=edit(VALID_INDEX, "scopes.manifests",
-                              {"pod_internal_cpcp": ".cpcp/pod_internal_cpcp/package.json"})),
+                              {"pod_internal": ".cpcp/pod_internal/package.json"})),
      "not a file"),
 
     ("scope-name-not-a-scope",
@@ -118,7 +138,7 @@ CASES = [
 
     # The folder and the manifest must agree about which scope this is.
     ("scope-disagrees-with-directory",
-     lambda: build(scope=edit(VALID_SCOPE, "scope", "pod_internal_cpcp")),
+     lambda: build(scope=edit(VALID_SCOPE, "scope", "pod_internal")),
      "must be the same"),
 
     ("scope-kind-wrong",
@@ -173,6 +193,76 @@ CASES = [
                                 "examples": ["examples/python/pull.py"]}]),
                    files=("examples/python/pull.py",)),
      "is not a file"),
+
+    # ---- Rule 8: a dependency names its producer and says whether it is built.
+
+    # A valid dependency scope must PASS, or a repo that only calls could not
+    # conform at all.
+    ("dependency-clean",
+     lambda: build(index=DEPENDENCY_INDEX, scope=VALID_DEPENDENCY,
+                   scope_dir="dependency"),
+     None),
+
+    ("dependency-without-producer",
+     lambda: build(index=DEPENDENCY_INDEX,
+                   scope=edit(VALID_DEPENDENCY, "depends_on",
+                              [{"operations": ["note.list"], "status": "published"}]),
+                   scope_dir="dependency"),
+     "no 'producer'"),
+
+    ("dependency-without-operations",
+     lambda: build(index=DEPENDENCY_INDEX,
+                   scope=edit(VALID_DEPENDENCY, "depends_on",
+                              [{"producer": "https://example.test/_cpcp",
+                                "status": "published"}]),
+                   scope_dir="dependency"),
+     "no 'operations'"),
+
+    ("dependency-with-unknown-status",
+     lambda: build(index=DEPENDENCY_INDEX,
+                   scope=edit(VALID_DEPENDENCY, "depends_on",
+                              [{"producer": "https://example.test/_cpcp",
+                                "operations": ["note.list"], "status": "someday"}]),
+                   scope_dir="dependency"),
+     "expected one of"),
+
+    # An unbuilt dependency is the one most worth recording, and the reason it
+    # is unbuilt is the whole content of the record.
+    ("dependency-unbuilt-without-because",
+     lambda: build(index=DEPENDENCY_INDEX,
+                   scope=edit(VALID_DEPENDENCY, "depends_on",
+                              [{"producer": "https://example.test/_cpcp",
+                                "operations": ["contextframe.list"],
+                                "status": "unbuilt"}]),
+                   scope_dir="dependency"),
+     "no 'because'"),
+
+    ("empty-depends-on-without-because",
+     lambda: build(index=DEPENDENCY_INDEX,
+                   scope=edit(VALID_DEPENDENCY, "depends_on", []),
+                   scope_dir="dependency"),
+     "no 'because'"),
+
+    # The two lists are not interchangeable in either direction.
+    ("dependency-carrying-seams",
+     lambda: build(index=DEPENDENCY_INDEX,
+                   scope=dict(VALID_DEPENDENCY, seams=[{"id": "stub"}]),
+                   scope_dir="dependency"),
+     "not 'seams'"),
+
+    ("serving-scope-carrying-depends-on",
+     lambda: build(scope=dict(VALID_SCOPE,
+                              depends_on=[{"producer": "x", "operations": ["y"],
+                                           "status": "published"}])),
+     "belongs in the dependency manifest"),
+
+    # A dependency scope asserts nothing about the producer's exposure.
+    ("dependency-carrying-exposure",
+     lambda: build(index=DEPENDENCY_INDEX,
+                   scope=dict(VALID_DEPENDENCY,
+                              exposure={"measured": True, "evidence": "somewhere"}),
+                   scope_dir="dependency"),
+     "no 'exposure'"),
 
     # ONE caller is the bar. This must PASS, or the standard would be demanding
     # a demonstration from every package.

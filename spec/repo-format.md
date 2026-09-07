@@ -8,8 +8,13 @@ A CPCP package repo declares its interface in `.cpcp/`. Machine readers start at
 .cpcp/<scope>/package.json    one per scope the repo SERVES. Zero or more.
 ```
 
-Scope directory names are the scope names exactly: `public_cpcp`,
-`pod_internal_cpcp`, `pod_external_cpcp` ([scopes](scopes.md)).
+Scope directory names are the scope names exactly: `dependency`,
+`pod_internal`, `services` ([scopes](scopes.md)).
+
+`.cpcp/<scope>/` says *this repo stands in that relation*. For
+`pod_internal` and `services` that means it serves the seams listed. For
+`dependency` it means the opposite — it **calls** what is listed, and
+something else serves it.
 
 **A terse interface spec is the point.** A CID and a caller that runs say what a
 paragraph cannot: what the methods are, what they accept, what comes back. Prose
@@ -44,10 +49,16 @@ Every requirement below names the test that decides it. The test is
 | `of` | always | non-empty |
 | `definition` | always | non-empty |
 | `source` | always | non-empty |
-| `seams` | always | a list; may be empty, and then rule 2 applies |
+| `seams` | `pod_internal`, `services` | a list; may be empty, and then rule 2 applies |
+| `depends_on` | `dependency` | a list; may be empty, and then rule 2 applies — see rule 8 |
 | `exposure` | when it can be measured | carries `evidence` naming where it was read |
 
-### Seven rules
+`seams` and `depends_on` are not interchangeable. A repo does not serve
+what it depends on, and one field meaning both would make a manifest
+readable only by knowing which folder it sat in. A `dependency` manifest
+carrying `seams`, or a serving manifest carrying `depends_on`, fails.
+
+### Eight rules
 
 1. **One seam, many scopes.** A seam appears in every scope manifest it is
    reachable at. Identical method contract, different exposure — one seam under
@@ -92,6 +103,28 @@ Every requirement below names the test that decides it. The test is
 
 A bare string in `cids` declares no caller and fails rule 7.
 
+8. **Every dependency names its producer, and says whether it is built.**
+   An entry carries `producer`, the `operations` this repo calls, and a
+   `status` of `published` or `unbuilt`. Anything other than `published`
+   needs a `because`. A dependency on an operation nobody serves yet is a
+   real dependency and the one most worth writing down — recording it is
+   how a caller states what it is waiting for, instead of discovering it
+   as a refusal in production.
+   *Test: an entry missing `producer`, `operations` or `status` fails; a
+   non-`published` status without a `because` fails. Whether the producer
+   really publishes it is not decidable here — that is what the `status`
+   claim is for, and a stale claim is still a claim someone can check.*
+
+```json
+"depends_on": [
+  { "producer": "https://magenticmarket.ai/_cpcp",
+    "cid": "https://magenticmarket.ai/_cpcp/cid.json",
+    "operations": ["contextframe.list"],
+    "status": "unbuilt",
+    "because": "the CID publishes build.list, build.get and build.create; contextframe.list refuses unknown_operation" }
+]
+```
+
 ## Optional
 
 None of this is required, and a repo without it conforms.
@@ -112,19 +145,31 @@ and never let it stand in for a CID or a caller.
 
 ## Worked example
 
-`magentic-stack` serves seams and carries all four files:
+`magentic-stack` serves seams and calls none, so it carries the serving
+scopes and no `dependency`:
 
 ```text
-.cpcp/package.json                    index; registry by SHA; switchyard-offline
-                                      under unscoped_seams with its because
-.cpcp/public_cpcp/package.json        seams: [] — the reference public surface
-                                      is cpcp_demo
-.cpcp/pod_internal_cpcp/package.json  back, vault, bus, persist, mind
-.cpcp/pod_external_cpcp/package.json  back (host), plus published surfaces that
-                                      are not seams
+.cpcp/package.json                index; registry by SHA; switchyard-offline
+                                  under unscoped_seams with its because
+.cpcp/pod_internal/package.json   back, vault, bus, persist, mind
+.cpcp/services/package.json       back (host), plus published surfaces that
+                                  are not seams
 ```
 
 `back` appears in two scope manifests, by rule 1.
+
+A repo that only calls carries the mirror image — one `dependency`
+manifest and no serving scopes:
+
+```text
+.cpcp/package.json                index
+.cpcp/dependency/package.json     the CIDs it calls, each with its producer
+                                  and a built/unbuilt status (rule 8)
+```
+
+Neither shape is incomplete. A missing scope directory says *this repo
+does not stand in that relation*, which is why rule 2 makes an empty one
+say what fills the gap instead.
 
 ## The test
 
@@ -134,7 +179,7 @@ python3 tooling/check-repo-format.py [REPO ...]
 
 No argument checks the contract home; otherwise point it at any package repo, or
 several. It reads only `.cpcp/` and the paths that manifest declares. It also
-resolves declared paths against the tree — not one of the seven rules, and it
+resolves declared paths against the tree — not one of the eight rules, and it
 earns its place: a manifest naming a file that does not exist is how a manifest
 and its repo drift apart when files move.
 

@@ -35,7 +35,14 @@ import re
 import sys
 
 KINDS = ("cpcp-contract", "cpcp-registry", "cpcp-demo", "cpcp-application")
-SCOPES = ("public_cpcp", "pod_internal_cpcp", "pod_external_cpcp")
+SCOPES = ("dependency", "pod_internal", "services")
+
+# The one scope that runs outbound: entries are CIDs this repo CALLS.
+DEPENDENCY_SCOPE = "dependency"
+
+# 'published' means the producer's CID names the operation today. Anything
+# else is a dependency the caller is waiting on, and rule 8 makes it say why.
+DEPENDENCY_STATUSES = ("published", "unbuilt", "retired")
 FULL_SHA = re.compile(r"\A[0-9a-f]{40}\Z")
 SHA_KEYS = ("rev", "sha", "self_rev", "revision")
 
@@ -187,28 +194,84 @@ def check_scope_manifest(repo, scope_dir, rep):
         if not str(doc.get(field, "")).strip():
             rep.fail(rel, "missing %s" % field)
 
-    seams = doc.get("seams")
-    if not isinstance(seams, list):
-        rep.fail(rel, "seams must be a list (it may be empty)")
-    elif not seams and not str(doc.get("because", "")).strip():
-        # Rule 2: an omitted scope cannot be told apart from an overlooked one,
-        # so an empty one has to say what serves that scope instead.
-        rep.fail(rel, "seams is empty and there is no 'because' naming what serves "
-                      "this scope instead (rule 2)")
+    # dependency runs the other way: this repo CALLS what is listed, and
+    # something else serves it. The two lists are not interchangeable, so
+    # each scope is held to its own field and refused the other one.
+    if scope_dir == DEPENDENCY_SCOPE:
+        check_depends_on(doc, rel, rep)
+        if "seams" in doc:
+            rep.fail(rel, "a dependency manifest carries 'depends_on', not 'seams'; "
+                          "this repo does not serve what it depends on")
+        if "exposure" in doc:
+            rep.fail(rel, "a dependency manifest has no 'exposure'; how far the "
+                          "producer's surface reaches is the producer's to measure")
+    else:
+        seams = doc.get("seams")
+        if not isinstance(seams, list):
+            rep.fail(rel, "seams must be a list (it may be empty)")
+        elif not seams and not str(doc.get("because", "")).strip():
+            # Rule 2: an omitted scope cannot be told apart from an overlooked
+            # one, so an empty one has to say what serves that scope instead.
+            rep.fail(rel, "seams is empty and there is no 'because' naming what serves "
+                          "this scope instead (rule 2)")
+        if "depends_on" in doc:
+            rep.fail(rel, "'depends_on' belongs in the %s manifest; a serving scope "
+                          "lists what it serves" % DEPENDENCY_SCOPE)
 
-    exposure = doc.get("exposure")
-    if isinstance(exposure, dict) and not str(exposure.get("evidence", "")).strip():
-        # Rule 4: read it from the deployment files and record which file.
-        rep.fail(rel, "exposure has no 'evidence'; rule 4 says exposure is measured, "
-                      "and a restatement of the method-to-scope map is not evidence")
+        exposure = doc.get("exposure")
+        if isinstance(exposure, dict) and not str(exposure.get("evidence", "")).strip():
+            # Rule 4: read it from the deployment files and record which file.
+            rep.fail(rel, "exposure has no 'evidence'; rule 4 says exposure is measured, "
+                          "and a restatement of the method-to-scope map is not evidence")
+
+        if isinstance(seams, list) and seams:
+            ids = [s.get("id") for s in seams if isinstance(s, dict)]
+            rep.note("%s serves seams: %s" % (scope_dir, ", ".join(str(i) for i in ids)))
 
     check_shas(doc, rel, rep)
     check_paths(doc, rel, repo, rep)
-
-    if isinstance(seams, list) and seams:
-        ids = [s.get("id") for s in seams if isinstance(s, dict)]
-        rep.note("%s serves seams: %s" % (scope_dir, ", ".join(str(i) for i in ids)))
     return doc
+
+
+def check_depends_on(doc, rel, rep):
+    """Rule 8: every dependency names its producer and says whether it is built."""
+    entries = doc.get("depends_on")
+    if not isinstance(entries, list):
+        rep.fail(rel, "depends_on must be a list (it may be empty)")
+        return
+    if not entries:
+        # Rule 2 again, from the calling side: an empty dependency scope has to
+        # say why it is there rather than absent.
+        if not str(doc.get("because", "")).strip():
+            rep.fail(rel, "depends_on is empty and there is no 'because' saying why "
+                          "this repo declares the scope while calling nothing (rule 2)")
+        return
+
+    for i, entry in enumerate(entries):
+        where = "depends_on[%d]" % i
+        if not isinstance(entry, dict):
+            rep.fail(rel, "%s must be an object, not %s (rule 8)"
+                     % (where, type(entry).__name__))
+            continue
+
+        if not str(entry.get("producer", "")).strip():
+            rep.fail(rel, "%s has no 'producer'; a dependency nobody serves is not "
+                          "traceable to anyone (rule 8)" % where)
+
+        ops = entry.get("operations")
+        if not isinstance(ops, list) or not ops:
+            rep.fail(rel, "%s has no 'operations'; naming a producer without naming "
+                          "what is called declares nothing (rule 8)" % where)
+
+        status = str(entry.get("status", "")).strip()
+        if status not in DEPENDENCY_STATUSES:
+            rep.fail(rel, "%s status is %r; expected one of %s (rule 8)"
+                     % (where, entry.get("status"), ", ".join(sorted(DEPENDENCY_STATUSES))))
+        elif status != "published" and not str(entry.get("because", "")).strip():
+            # An unbuilt dependency is the one most worth recording, and the
+            # reason it is unbuilt is the whole content of the record.
+            rep.fail(rel, "%s is %r and has no 'because' saying how that was "
+                          "determined (rule 8)" % (where, status))
 
 
 def check_repo(repo):
