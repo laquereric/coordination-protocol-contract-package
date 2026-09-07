@@ -1,0 +1,24 @@
+# Gate - the contract home holds its own format, and its checker is watched failing.
+#
+# The plants run first and are not optional: spec/repo-format.md says a checker
+# nobody has watched fail is a guess about what it would do, so the guess is
+# eliminated before the checker's verdict is trusted.
+name: gate-repo-format
+on:
+  push: { branches: [ main ] }
+  pull_request:
+  workflow_call:
+
+jobs:
+  repo-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+
+      - name: Plants - every rule must refuse when broken
+        run: python3 tooling/plant-repo-format.py
+
+      - name: This repo conforms to the format it publishes
+        run: python3 tooling/check-repo-format.py
