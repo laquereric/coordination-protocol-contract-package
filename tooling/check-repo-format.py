@@ -109,16 +109,42 @@ def check_shas(doc, where, rep):
                      % (path.lstrip("."), value))
 
 
+def elsewhere_prefixes(node, path="", out=None):
+    """Paths of objects that name ANOTHER repo, so their paths are its paths.
+
+    Rule 6 says reference by repo and revision. An object doing that -- carrying
+    a `repo` or a `rev` -- is describing a tree that is not this one, so a path
+    beside them resolves there and checking it here is the checker being wrong
+    about whose tree it is reading. That is the same mistake PATH_KEYS_ELSEWHERE
+    was added for, but keyed on the citation's SHAPE rather than on remembering
+    to allowlist every field name a citation might use.
+    """
+    out = set() if out is None else out
+    if isinstance(node, dict):
+        if "repo" in node or "rev" in node:
+            out.add(path)
+        for k, v in node.items():
+            elsewhere_prefixes(v, "%s.%s" % (path, k), out)
+    elif isinstance(node, list):
+        for i, v in enumerate(node):
+            elsewhere_prefixes(v, "%s[%d]" % (path, i), out)
+    return out
+
+
 def check_paths(doc, where, repo, rep):
     """Declared paths resolve.
 
-    Not one of the six rules, and the reason it is here: a manifest is a claim
+    Not one of the eight rules, and the reason it is here: a manifest is a claim
     about a repo, and a claim naming a file that does not exist is how the
     manifest and the tree drift apart silently -- exactly what happens when
     files move and nobody updates the index.
     """
+    elsewhere = elsewhere_prefixes(doc)
     for path, value in walk_strings(doc):
         key = path.rsplit(".", 1)[-1].split("[")[0]
+        # A path inside a citation belongs to the repo that citation names.
+        if any(path.startswith(p + ".") for p in elsewhere if p):
+            continue
         # 'source' NAMES THE CONTRACT, NOT THIS REPO. A scope manifest cites
         # spec/scopes.md because that is where its definition came from; the file
         # lives in the contract home. Checking it here reported four repos as

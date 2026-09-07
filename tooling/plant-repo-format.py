@@ -270,6 +270,24 @@ CASES = [
                    scope_dir="dependency"),
      "no 'exposure'"),
 
+    # A path inside a repo+rev citation is that repo's path, not ours. Without
+    # this, a manifest citing a doc in another repo is reported as broken for
+    # citing it correctly.
+    ("citation-path-not-checked-locally",
+     lambda: build(index=dict(VALID_INDEX, role={
+         "name": "FRONT",
+         "defined_by": {"repo": "https://github.com/laquereric/magentic-stack",
+                        "rev": "918227713fb1929dbd48836a0b47dc3390e7e9d9",
+                        "doc": "docs/architecture/OVERVIEW.md"}})),
+     None),
+
+    # But a path OUTSIDE any citation still has to exist here, or the exemption
+    # would be a hole big enough to drive the whole check through.
+    ("local-path-still-checked",
+     lambda: build(index=dict(VALID_INDEX, role={
+         "name": "FRONT", "doc": "docs/architecture/OVERVIEW.md"})),
+     "does not exist in this repo"),
+
     # ---- The published vocabulary must be complete and must invent nothing.
 
     ("scope-definitions-complete",
