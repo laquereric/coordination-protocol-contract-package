@@ -48,6 +48,12 @@ mapper must not guess.
   signal; it must not replace the header.
 * `GET /_cpcp/up` and `GET /_cpcp/cid.json` stay 200. They are not RPC
   method results.
+* This mapping is for this endpoint. Binding reasons — A2A, intrapod
+  NATS, webmcpld — are decided by the road rather than the seam and
+  carry their own class, which for two of the three roads is no HTTP
+  status at all (`spec/refusals.md`, Bindings). A reader who takes the
+  table above as total will map an in-tab refusal to a status the call
+  never had.
 
 ## Profiles and rollout
 

@@ -247,9 +247,9 @@ CPCP reason.
 
 Reasons come from [`spec/refusals.md`](../spec/refusals.md):
 `unknown_operation`, `missing_params`, `grounding_refused`,
-`authorization_denied` all carry over unchanged. Three have no HTTP
-analogue and are **proposed additions scoped to this binding** — they
-are named here, not yet in the taxonomy:
+`authorization_denied` all carry over unchanged. Three are this
+binding's own, and live under
+[Bindings](../spec/refusals.md#bindings) with their carrier and layer:
 
 | reason | meaning |
 |---|---|
@@ -261,6 +261,10 @@ are named here, not yet in the taxonomy:
 inevitable: tools appear and vanish with page state, and an agent
 holding a handle from a second ago is holding a claim about a page that
 has moved on.
+
+`operation_id_required` (§4) does not arise here. It stays in the
+taxonomy for the seam, where the caller is the only party who could
+have named the intent.
 
 ---
 
