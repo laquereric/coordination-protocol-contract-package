@@ -6,10 +6,16 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
 
-<https://w3id.org/cpcp/ontology/base/1.0.0>
+# The ontology IRI is stable and unversioned; the versionIRI names one cut of
+# it. They were one string through 1.0.0, which meant a term's isDefinedBy
+# churned on every release and a consumer dereferencing an old cut landed on a
+# graph that no longer existed. Terms are defined by the ontology. Releases are
+# named by the versionIRI, and only there.
+<https://w3id.org/cpcp/ontology/base>
   a owl:Ontology ;
-  owl:versionIRI <https://w3id.org/cpcp/ontology/base/1.0.0> ;
-  owl:versionInfo "1.0.0" ;
+  owl:versionIRI <https://w3id.org/cpcp/ontology/base/0.1.1> ;
+  owl:versionInfo "0.1.1" ;
+  owl:priorVersion <https://w3id.org/cpcp/ontology/base/1.0.0> ;
   owl:imports <https://w3id.org/json-rpc-ld/ontology/core/1.0.0> ;
   rdfs:label "CPCP base ontology"@en ;
   rdfs:comment "coordination-protocol-contract-package (PubSubStandard_1) foundation: CID, PULL/PUSH operations, ledgers, canonical records, and pods, plus the webmcpld browser binding. Imports JSON-RPC-LD core; PS1-PX profiles import this."@en ;
@@ -19,123 +25,123 @@
 cpcp:Envelope a owl:Class ; rdfs:subClassOf jrl:Envelope ;
   rdfs:label "CPCP envelope"@en ;
   rdfs:comment "A JSON-RPC-LD envelope carrying a CPCP record payload."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 
 cpcp:Operation a owl:Class ; rdfs:subClassOf jrl:Operation ;
   rdfs:label "CPCP operation"@en ;
   rdfs:comment "A CID-declared operation with an allowed direction (PULL or PUSH)."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 
 cpcp:CID a owl:Class ;
   rdfs:label "Cyborg Interface Descriptor"@en ;
   rdfs:comment "The release-controlled grounding contract (JSON-LD context + operation manifest + closed shapes) from which the OKF bundle, ontology, shapes, and language bindings are all generated."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 
 cpcp:Profile a owl:Class ;
   rdfs:label "CPCP profile"@en ;
   rdfs:comment "A concrete contract package (e.g. PS1-P1) that has exactly one CID."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 
 cpcp:Pod a owl:Class ;
   rdfs:label "pod"@en ;
   rdfs:comment "A deployable FRONT/BACK unit that serves a CPCP profile's operations."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 
 cpcp:Direction a owl:Class ;
   rdfs:label "operation direction"@en ;
   rdfs:comment "The permitted data-flow direction of an operation: PULL (FRONT<-BACK) or PUSH (BACK<-FRONT)."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 
 cpcp:Ledger a owl:Class ;
   rdfs:label "ledger"@en ;
   rdfs:comment "An append-only store a record is placed in."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 cpcp:CanonicalLedger a owl:Class ; rdfs:subClassOf cpcp:Ledger ;
   rdfs:label "canonical ledger"@en ;
   rdfs:comment "The portable, shared source of truth."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 cpcp:SyncIntentLedger a owl:Class ; rdfs:subClassOf cpcp:Ledger ;
   rdfs:label "sync-intent ledger"@en ;
   rdfs:comment "Pending intended mutations awaiting reconciliation."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 cpcp:PrivateLocalLedger a owl:Class ; rdfs:subClassOf cpcp:Ledger ;
   rdfs:label "private-local ledger"@en ;
   rdfs:comment "Non-portable, device-local records that MUST NOT cross a portable PULL/PUSH boundary."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 
 cpcp:Record a owl:Class ;
   rdfs:label "record"@en ;
   rdfs:comment "A typed payload carried by an envelope and placed in a ledger."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 cpcp:CanonicalRecord a owl:Class ; rdfs:subClassOf cpcp:Record ;
   rdfs:label "canonical record"@en ;
   rdfs:comment "A portable record destined for the canonical ledger."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 cpcp:Note a owl:Class ; rdfs:subClassOf cpcp:CanonicalRecord ;
   rdfs:label "note"@en ; rdfs:comment "A portable canonical record containing a note."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 cpcp:Insight a owl:Class ; rdfs:subClassOf cpcp:CanonicalRecord ;
   rdfs:label "insight"@en ; rdfs:comment "A portable canonical record containing an insight."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 cpcp:Receipt a owl:Class ; rdfs:subClassOf cpcp:CanonicalRecord ;
   rdfs:label "receipt"@en ; rdfs:comment "Evidence of a protocol action or attested result."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 cpcp:SyncIntent a owl:Class ; rdfs:subClassOf cpcp:Record ;
   rdfs:label "sync intent"@en ; rdfs:comment "A pending intended mutation destined for the sync-intent ledger."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 cpcp:PrivateLocalArtifact a owl:Class ; rdfs:subClassOf cpcp:Record ;
   rdfs:label "private-local artifact"@en ; rdfs:comment "A non-portable device-local record; never crosses a portable boundary."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 
 # ---- Direction individuals ---------------------------------------------------
 cpcp:PULL a owl:NamedIndividual, cpcp:Direction ;
   rdfs:label "PULL"@en ; rdfs:comment "FRONT reads canonical state from BACK."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 cpcp:PUSH a owl:NamedIndividual, cpcp:Direction ;
   rdfs:label "PUSH"@en ; rdfs:comment "FRONT publishes a permitted record to BACK."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 
 # ---- Object properties -------------------------------------------------------
 cpcp:declaresOperation a owl:ObjectProperty ;
   rdfs:domain cpcp:CID ; rdfs:range cpcp:Operation ;
   rdfs:label "declares operation"@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 cpcp:hasCID a owl:ObjectProperty ;
   rdfs:domain cpcp:Profile ; rdfs:range cpcp:CID ;
   rdfs:label "has CID"@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 cpcp:invokesOperation a owl:ObjectProperty ; rdfs:subPropertyOf jrl:invokesOperation ;
   rdfs:domain cpcp:Envelope ; rdfs:range cpcp:Operation ;
   rdfs:label "invokes operation"@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 cpcp:hasPayload a owl:ObjectProperty ;
   rdfs:domain cpcp:Envelope ; rdfs:range cpcp:Record ;
   rdfs:label "has payload"@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 cpcp:storedIn a owl:ObjectProperty ;
   rdfs:domain cpcp:Record ; rdfs:range cpcp:Ledger ;
   rdfs:label "stored in"@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 cpcp:hasDirection a owl:ObjectProperty ;
   rdfs:domain cpcp:Operation ; rdfs:range cpcp:Direction ;
   rdfs:label "has direction"@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 cpcp:references a owl:ObjectProperty ;
   rdfs:domain cpcp:Record ; rdfs:range rdfs:Resource ;
   rdfs:label "references"@en ;
   rdfs:comment "A record's portable @id reference to another resource."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 
 # ---- Datatype properties -----------------------------------------------------
 cpcp:contentDigest a owl:DatatypeProperty ;
   rdfs:domain cpcp:CID ; rdfs:range xsd:string ;
   rdfs:label "content digest"@en ;
   rdfs:comment "The immutable digest of the CID release artifact."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 cpcp:protocolVersion a owl:DatatypeProperty ;
   rdfs:range xsd:string ;
   rdfs:label "protocol version"@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 
 # ---- Direction as a type -----------------------------------------------------
 # cpcp:PULL and cpcp:PUSH above name the direction OF AN OPERATION. The wire
@@ -148,12 +154,12 @@ cpcp:Pull a owl:Class ;
   rdfs:label "PULL-typed node"@en ;
   rdfs:comment "A node whose direction is read access: the caller reads from the seam, the page, or the peer. Costs nothing and promises nothing."@en ;
   rdfs:seeAlso cpcp:PULL ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 cpcp:Push a owl:Class ;
   rdfs:label "PUSH-typed node"@en ;
   rdfs:comment "A node whose direction is write access: the caller publishes a typed, closed-shape Effect, carrying an operationId -- its word for what it is doing."@en ;
   rdfs:seeAlso cpcp:PUSH ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 cpcp:Pull owl:disjointWith cpcp:Push .
 
 # ---- webmcpld: the grant in a browser tab ------------------------------------
@@ -163,62 +169,62 @@ cpcp:Pull owl:disjointWith cpcp:Push .
 webmcpld:Tool a owl:Class ; rdfs:subClassOf cpcp:Operation ;
   rdfs:label "webmcpld tool"@en ;
   rdfs:comment "A WebMCP tool carrying a durable capability IRI, a direction (cpcp:Pull or cpcp:Push), and a closed shape. A CPCP operation whose seam is a page."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 
 webmcpld:CID a owl:Class ; rdfs:subClassOf cpcp:CID ;
   rdfs:label "webmcpld CID"@en ;
   rdfs:comment "The contract of one origin's tools, linked from the document and resolvable at a well-known path. A tool grounding itself against a CID that does not declare it is grounding itself against nothing."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 
 # ---- webmcpld object properties ----------------------------------------------
 webmcpld:declaresTool a owl:ObjectProperty ; rdfs:subPropertyOf cpcp:declaresOperation ;
   rdfs:domain webmcpld:CID ; rdfs:range webmcpld:Tool ;
   rdfs:label "declares tool"@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 webmcpld:cid a owl:ObjectProperty ;
   rdfs:domain webmcpld:Tool ; rdfs:range webmcpld:CID ;
   rdfs:label "cid"@en ;
   rdfs:comment "The CID this tool names, as an absolute URL. The inverse direction of declaresTool, asserted by the page rather than by the document."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 webmcpld:instance a owl:ObjectProperty ;
   rdfs:domain webmcpld:CID ; rdfs:range rdfs:Resource ;
   rdfs:label "instance"@en ;
   rdfs:comment "The origin whose tools this CID declares."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 webmcpld:inputShape a owl:ObjectProperty ;
   rdfs:domain webmcpld:Tool ; rdfs:range rdfs:Resource ;
   rdfs:label "input shape"@en ;
   rdfs:comment "The SHACL node shape the arguments must satisfy. A resource reference, not a shape: shapes live in the profile, never duplicated here."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 webmcpld:outputShape a owl:ObjectProperty ;
   rdfs:domain webmcpld:Tool ; rdfs:range rdfs:Resource ;
   rdfs:label "output shape"@en ;
   rdfs:comment "The SHACL node shape the result must satisfy."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 
 # ---- webmcpld datatype properties --------------------------------------------
 webmcpld:toolName a owl:DatatypeProperty ;
   rdfs:domain webmcpld:Tool ; rdfs:range xsd:string ;
   rdfs:label "tool name"@en ;
   rdfs:comment "The page-local WebMCP name. Not an identifier: two origins may both call it \"search\", and neither name means anything a tab over. The @id is what identifies."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 webmcpld:exposedTo a owl:DatatypeProperty ;
   rdfs:domain webmcpld:Tool ; rdfs:range xsd:string ;
   rdfs:label "exposed to"@en ;
   rdfs:comment "A secure origin this tool is reachable from. Absent means same-origin documents and the user agent's own agent -- pod_internal_services in scope terms; present widens the reach to services. Exposure is measured from what is served, never from what the source intended."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 webmcpld:autosubmit a owl:DatatypeProperty ;
   rdfs:domain webmcpld:Tool ; rdfs:range xsd:boolean ;
   rdfs:label "autosubmit"@en ;
   rdfs:comment "True asserts that this tool needs no human confirmation. On a cpcp:Push tool that is a claim a write may happen unwatched, and it is void without a because."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 webmcpld:because a owl:DatatypeProperty ;
   rdfs:domain webmcpld:Tool ; rdfs:range xsd:string ;
   rdfs:label "because"@en ;
   rdfs:comment "Why a tool departs from the safe default. Required beside autosubmit true -- anything other than the default needs a reason somebody can read."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 webmcpld:declaresReason a owl:DatatypeProperty ;
   rdfs:domain webmcpld:CID ; rdfs:range xsd:string ;
   rdfs:label "declares reason"@en ;
   rdfs:comment "A refusal reason this origin's tools can answer with, from the closed taxonomy (spec/refusals.md, including the Bindings section this binding's three live in)."@en ;
-  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .

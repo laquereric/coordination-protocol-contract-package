@@ -9,9 +9,34 @@ term below are unchanged by that naming: the letters did not move.
 (`CanonicalRecord` → `Note` / `Insight` / `Receipt`, plus `SyncIntent`,
 `PrivateLocalArtifact`), and `Pod`.
 
-- **Ontology IRI:** `https://w3id.org/cpcp/ontology/base/1.0.0`
-- **Term namespace:** `https://w3id.org/cpcp/ns#` (`cpcp:`)
+- **Ontology IRI:** `https://w3id.org/cpcp/ontology/base` — stable, unversioned
+- **Version IRI:** `https://w3id.org/cpcp/ontology/base/0.1.1`
+- **Term namespaces:** `https://w3id.org/cpcp/ns#` (`cpcp:`),
+  `https://w3id.org/cpcp/osi8/webmcpld#` (`webmcpld:`)
 - **Imports:** `json-rpc-ld` core (`.../json-rpc-ld/ontology/core/1.0.0`)
+
+## Versions
+
+The ontology IRI **identifies the ontology**; the versionIRI **names one cut
+of it**. Through 1.0.0 they were the same string, and that had two costs: every
+term's `rdfs:isDefinedBy` churned on each release, and a consumer dereferencing
+an older cut landed on a graph that no longer existed. Terms are now defined by
+the stable IRI. Only `owl:versionIRI` and `owl:versionInfo` carry the number.
+
+| Version | |
+|---|---|
+| `0.1.1` | current — the split, plus the webmcpld terms and `cpcp:Pull` / `cpcp:Push` |
+| `1.0.0` | `owl:priorVersion` — the unsplit cut, where the ontology IRI *was* the version |
+
+0.1.1 sorts below 1.0.0, and the ordering is recorded in `owl:priorVersion`
+rather than smoothed over. The renumbering aligns the ontology with the
+package's own tag, and it costs nothing today because no W3ID redirect is
+published ([identity](../spec/identity.md)) — an IRI here is a durable name a
+reader can compare, not a promise of a fetch. That stops being true the moment
+one resolves.
+
+The import of `json-rpc-ld` core stays pinned to that base's versionIRI. A
+dependency is pinned, not followed.
 
 ## Direction as a type
 

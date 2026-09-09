@@ -21,9 +21,17 @@
   },
   "ontology": {
     "file": "ontology/cpcp-base.ttl",
-    "ontology_iri": "https://w3id.org/cpcp/ontology/base/1.0.0",
+    "ontology_iri": "https://w3id.org/cpcp/ontology/base",
+    "version_iri": "https://w3id.org/cpcp/ontology/base/0.1.1",
+    "version": "0.1.1",
+    "prior_version_iri": "https://w3id.org/cpcp/ontology/base/1.0.0",
+    "term_namespaces": [
+      "https://w3id.org/cpcp/ns#",
+      "https://w3id.org/cpcp/osi8/webmcpld#"
+    ],
     "term_namespace": "https://w3id.org/cpcp/ns#",
-    "imports": "https://w3id.org/json-rpc-ld/ontology/core/1.0.0"
+    "imports": "https://w3id.org/json-rpc-ld/ontology/core/1.0.0",
+    "note": "ontology_iri is stable and identifies the ontology; version_iri names one cut of it. They were one string through 1.0.0. The import of json-rpc-ld core stays pinned to that base's versionIRI on purpose -- a dependency is pinned, not followed."
   },
   "provenance": "PROVENANCE.json",
   "standing_on": {
