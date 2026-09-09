@@ -1,4 +1,5 @@
 @prefix cpcp: <https://w3id.org/cpcp/ns#> .
+@prefix webmcpld: <https://w3id.org/cpcp/osi8/webmcpld#> .
 @prefix jrl:  <https://w3id.org/json-rpc-ld/ns#> .
 @prefix owl:  <http://www.w3.org/2002/07/owl#> .
 @prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -11,7 +12,7 @@
   owl:versionInfo "1.0.0" ;
   owl:imports <https://w3id.org/json-rpc-ld/ontology/core/1.0.0> ;
   rdfs:label "CPCP base ontology"@en ;
-  rdfs:comment "coordination-protocol-contract-package (PubSubStandard_1) foundation: CID, PULL/PUSH operations, ledgers, canonical records, and pods. Imports JSON-RPC-LD core; PS1-PX profiles import this."@en ;
+  rdfs:comment "coordination-protocol-contract-package (PubSubStandard_1) foundation: CID, PULL/PUSH operations, ledgers, canonical records, and pods, plus the webmcpld browser binding. Imports JSON-RPC-LD core; PS1-PX profiles import this."@en ;
   rdfs:seeAlso <https://github.com/laquereric/coordination-protocol-contract-package> .
 
 # ---- Classes -----------------------------------------------------------------
@@ -134,4 +135,90 @@ cpcp:contentDigest a owl:DatatypeProperty ;
 cpcp:protocolVersion a owl:DatatypeProperty ;
   rdfs:range xsd:string ;
   rdfs:label "protocol version"@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+
+# ---- Direction as a type -----------------------------------------------------
+# cpcp:PULL and cpcp:PUSH above name the direction OF AN OPERATION. The wire
+# types a NODE instead -- a2a writes type: ["Effect", "cpcp:Push"], webmcpld
+# writes @type: ["webmcpld:Tool", "cpcp:Pull"] -- and that spelling had no term.
+# Same distinction, two positions. Kept as classes rather than a restriction on
+# cpcp:hasDirection: an a2a Context typed cpcp:Pull is not thereby an Operation,
+# and a domain inference saying it is would be a fact nobody asserted.
+cpcp:Pull a owl:Class ;
+  rdfs:label "PULL-typed node"@en ;
+  rdfs:comment "A node whose direction is read access: the caller reads from the seam, the page, or the peer. Costs nothing and promises nothing."@en ;
+  rdfs:seeAlso cpcp:PULL ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+cpcp:Push a owl:Class ;
+  rdfs:label "PUSH-typed node"@en ;
+  rdfs:comment "A node whose direction is write access: the caller publishes a typed, closed-shape Effect, carrying an operationId -- its word for what it is doing."@en ;
+  rdfs:seeAlso cpcp:PUSH ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+cpcp:Pull owl:disjointWith cpcp:Push .
+
+# ---- webmcpld: the grant in a browser tab ------------------------------------
+# Terms for the WebMCP superset binding (webmcpld/README.md). Namespace is
+# https://w3id.org/cpcp/osi8/webmcpld# -- not the domain that serves the
+# reference instance. Domains change hands; identity must not.
+webmcpld:Tool a owl:Class ; rdfs:subClassOf cpcp:Operation ;
+  rdfs:label "webmcpld tool"@en ;
+  rdfs:comment "A WebMCP tool carrying a durable capability IRI, a direction (cpcp:Pull or cpcp:Push), and a closed shape. A CPCP operation whose seam is a page."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+
+webmcpld:CID a owl:Class ; rdfs:subClassOf cpcp:CID ;
+  rdfs:label "webmcpld CID"@en ;
+  rdfs:comment "The contract of one origin's tools, linked from the document and resolvable at a well-known path. A tool grounding itself against a CID that does not declare it is grounding itself against nothing."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+
+# ---- webmcpld object properties ----------------------------------------------
+webmcpld:declaresTool a owl:ObjectProperty ; rdfs:subPropertyOf cpcp:declaresOperation ;
+  rdfs:domain webmcpld:CID ; rdfs:range webmcpld:Tool ;
+  rdfs:label "declares tool"@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+webmcpld:cid a owl:ObjectProperty ;
+  rdfs:domain webmcpld:Tool ; rdfs:range webmcpld:CID ;
+  rdfs:label "cid"@en ;
+  rdfs:comment "The CID this tool names, as an absolute URL. The inverse direction of declaresTool, asserted by the page rather than by the document."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+webmcpld:instance a owl:ObjectProperty ;
+  rdfs:domain webmcpld:CID ; rdfs:range rdfs:Resource ;
+  rdfs:label "instance"@en ;
+  rdfs:comment "The origin whose tools this CID declares."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+webmcpld:inputShape a owl:ObjectProperty ;
+  rdfs:domain webmcpld:Tool ; rdfs:range rdfs:Resource ;
+  rdfs:label "input shape"@en ;
+  rdfs:comment "The SHACL node shape the arguments must satisfy. A resource reference, not a shape: shapes live in the profile, never duplicated here."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+webmcpld:outputShape a owl:ObjectProperty ;
+  rdfs:domain webmcpld:Tool ; rdfs:range rdfs:Resource ;
+  rdfs:label "output shape"@en ;
+  rdfs:comment "The SHACL node shape the result must satisfy."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+
+# ---- webmcpld datatype properties --------------------------------------------
+webmcpld:toolName a owl:DatatypeProperty ;
+  rdfs:domain webmcpld:Tool ; rdfs:range xsd:string ;
+  rdfs:label "tool name"@en ;
+  rdfs:comment "The page-local WebMCP name. Not an identifier: two origins may both call it \"search\", and neither name means anything a tab over. The @id is what identifies."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+webmcpld:exposedTo a owl:DatatypeProperty ;
+  rdfs:domain webmcpld:Tool ; rdfs:range xsd:string ;
+  rdfs:label "exposed to"@en ;
+  rdfs:comment "A secure origin this tool is reachable from. Absent means same-origin documents and the user agent's own agent -- pod_internal_services in scope terms; present widens the reach to services. Exposure is measured from what is served, never from what the source intended."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+webmcpld:autosubmit a owl:DatatypeProperty ;
+  rdfs:domain webmcpld:Tool ; rdfs:range xsd:boolean ;
+  rdfs:label "autosubmit"@en ;
+  rdfs:comment "True asserts that this tool needs no human confirmation. On a cpcp:Push tool that is a claim a write may happen unwatched, and it is void without a because."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+webmcpld:because a owl:DatatypeProperty ;
+  rdfs:domain webmcpld:Tool ; rdfs:range xsd:string ;
+  rdfs:label "because"@en ;
+  rdfs:comment "Why a tool departs from the safe default. Required beside autosubmit true -- anything other than the default needs a reason somebody can read."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
+webmcpld:declaresReason a owl:DatatypeProperty ;
+  rdfs:domain webmcpld:CID ; rdfs:range xsd:string ;
+  rdfs:label "declares reason"@en ;
+  rdfs:comment "A refusal reason this origin's tools can answer with, from the closed taxonomy (spec/refusals.md, including the Bindings section this binding's three live in)."@en ;
   rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base/1.0.0> .
