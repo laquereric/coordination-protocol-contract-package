@@ -1,4 +1,5 @@
 @prefix cpcp: <https://w3id.org/cpcp/ns#> .
+@prefix a2a:  <https://w3id.org/cpcp/osi8/a2a#> .
 @prefix webmcpld: <https://w3id.org/cpcp/osi8/webmcpld#> .
 @prefix jrl:  <https://w3id.org/json-rpc-ld/ns#> .
 @prefix owl:  <http://www.w3.org/2002/07/owl#> .
@@ -13,12 +14,12 @@
 # named by the versionIRI, and only there.
 <https://w3id.org/cpcp/ontology/base>
   a owl:Ontology ;
-  owl:versionIRI <https://w3id.org/cpcp/ontology/base/0.1.1> ;
-  owl:versionInfo "0.1.1" ;
-  owl:priorVersion <https://w3id.org/cpcp/ontology/base/1.0.0> ;
+  owl:versionIRI <https://w3id.org/cpcp/ontology/base/0.1.2> ;
+  owl:versionInfo "0.1.2" ;
+  owl:priorVersion <https://w3id.org/cpcp/ontology/base/0.1.1> ;
   owl:imports <https://w3id.org/json-rpc-ld/ontology/core/1.0.0> ;
   rdfs:label "CPCP base ontology"@en ;
-  rdfs:comment "coordination-protocol-contract-package (PubSubStandard_1) foundation: CID, PULL/PUSH operations, ledgers, canonical records, and pods, plus the webmcpld browser binding. Imports JSON-RPC-LD core; PS1-PX profiles import this."@en ;
+  rdfs:comment "coordination-protocol-contract-package (PubSubStandard_1) foundation: CID, PULL/PUSH operations, the grant and its result, ledgers, canonical records, and pods, plus two bindings -- a2a between agents and webmcpld in a browser tab. Imports JSON-RPC-LD core; PS1-PX profiles import this."@en ;
   rdfs:seeAlso <https://github.com/laquereric/coordination-protocol-contract-package> .
 
 # ---- Classes -----------------------------------------------------------------
@@ -91,6 +92,43 @@ cpcp:SyncIntent a owl:Class ; rdfs:subClassOf cpcp:Record ;
   rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 cpcp:PrivateLocalArtifact a owl:Class ; rdfs:subClassOf cpcp:Record ;
   rdfs:label "private-local artifact"@en ; rdfs:comment "A non-portable device-local record; never crosses a portable boundary."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+
+# ---- The grant, and what comes back ------------------------------------------
+# One grant, two faces. Every binding in this tree has been typing nodes
+# cpcp:Context, cpcp:Effect and cpcp:Result on the wire against a vocabulary
+# that did not define them.
+cpcp:Grant a owl:Class ;
+  rdfs:label "grant"@en ;
+  rdfs:comment "The affordance a deterministic entity grants a non-deterministic one, as a node: a Context (read) or an Effect (write). Not an access decision -- authentication and authorization have already run, out of band."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+cpcp:Context a owl:Class ; rdfs:subClassOf cpcp:Grant ;
+  rdfs:label "context"@en ;
+  rdfs:comment "The read face: grounded state a party pulls across the seam, following CID @id references. Costs nothing and promises nothing. Carries no operationId."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+cpcp:Effect a owl:Class ; rdfs:subClassOf cpcp:Grant ;
+  rdfs:label "effect"@en ;
+  rdfs:comment "The write face: a typed, closed-shape node a party pushes across the seam, carrying an operationId -- the actor's word for what it is doing. The id is jrl:operationId; this vocabulary depends on it and does not restate it."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+cpcp:Context owl:disjointWith cpcp:Effect .
+
+cpcp:Result a owl:Class ;
+  rdfs:label "result"@en ;
+  rdfs:comment "What comes back, always. Never raise across the boundary: a refusal is a Result with ok false and a reason, not an exception, a dropped connection, or a bare status."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+cpcp:ok a owl:DatatypeProperty ;
+  rdfs:domain cpcp:Result ; rdfs:range xsd:boolean ;
+  rdfs:label "ok"@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+cpcp:reason a owl:DatatypeProperty ;
+  rdfs:domain cpcp:Result ; rdfs:range xsd:string ;
+  rdfs:label "reason"@en ;
+  rdfs:comment "A member of the closed refusal taxonomy (spec/refusals.md). Stable strings: renaming one is a breaking contract change. It reaches a reader under error.reason or flat; both shapes are live and a client handles both."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+cpcp:because a owl:DatatypeProperty ;
+  rdfs:domain cpcp:Result ; rdfs:range rdfs:Literal ;
+  rdfs:label "because"@en ;
+  rdfs:comment "Why this reason, for a reader. Free text or a structured object depending on the seam; never a second reason."@en ;
   rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 
 # ---- Direction individuals ---------------------------------------------------
@@ -227,4 +265,182 @@ webmcpld:declaresReason a owl:DatatypeProperty ;
   rdfs:domain webmcpld:CID ; rdfs:range xsd:string ;
   rdfs:label "declares reason"@en ;
   rdfs:comment "A refusal reason this origin's tools can answer with, from the closed taxonomy (spec/refusals.md, including the Bindings section this binding's three live in)."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+
+# ---- a2a: one agent addressing another ---------------------------------------
+# Terms for the payloads the A2A bindings put on the wire (a2a/README.md).
+# Namespace is https://w3id.org/cpcp/osi8/a2a#. The JSON-RPC 2.0 frame is NOT
+# modelled here and never will be: compacting jsonrpc into an IRI would break
+# every JSON-RPC parser, and the frame is json-rpc-ld's, not this vocabulary's.
+# What follows is the JSON-LD *inside* params and result.
+a2a:Message a owl:Class ;
+  rdfs:label "message"@en ;
+  rdfs:comment "The node sent under params.message. Carries Parts, one of which is the grant."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:Part a owl:Class ;
+  rdfs:label "part"@en ;
+  rdfs:comment "One member of a Message or Artifact."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:DataPart a owl:Class ; rdfs:subClassOf a2a:Part ;
+  rdfs:label "data part"@en ;
+  rdfs:comment "The Part that carries a grant: mediaType application/ld+json, and data that IS a cpcp:Context or cpcp:Effect node. Not a JSON object wrapping one."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:TextPart a owl:Class ; rdfs:subClassOf a2a:Part ;
+  rdfs:label "text part"@en ;
+  rdfs:comment "A Part carrying no grant. A message of these alone is refused a2a_unsupported_part; the dispatcher never runs."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:Task a owl:Class ;
+  rdfs:label "task"@en ;
+  rdfs:comment "What message/send returns and tasks/get reads back. Task identity is neither the JSON-RPC id nor the operationId, and the Task map is not the admission journal."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:TaskStatus a owl:Class ;
+  rdfs:label "task status"@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:TaskState a owl:Class ;
+  rdfs:label "task state"@en ;
+  rdfs:comment "Whether A2A delivered the grant, and whether the grant succeeded. Two questions, one field."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:Artifact a owl:Class ;
+  rdfs:label "artifact"@en ;
+  rdfs:comment "What a Task carries back. The CPCP Result rides in an artifact Part, same media type, same vocabulary as the request."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:AgentCard a owl:Class ;
+  rdfs:label "agent card"@en ;
+  rdfs:comment "Discovery. On the internet road, GET /.well-known/agent-card.json; in a pod, agent/card on the agent's subject. Advertises the authentication scheme and carries no secrets."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:Interface a owl:Class ;
+  rdfs:label "interface"@en ;
+  rdfs:comment "One way to reach the agent: a transport, and the address on it."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:Skill a owl:Class ;
+  rdfs:label "skill"@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:Capabilities a owl:Class ;
+  rdfs:label "capabilities"@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:Transport a owl:Class ;
+  rdfs:label "transport"@en ;
+  rdfs:comment "A road. Level 8 semantics MUST be identical across roads: a grant valid on one is valid on the other, and only discovery, addressing and the HTTP dual-signal differ."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+
+# ---- a2a individuals ---------------------------------------------------------
+a2a:HTTP a owl:NamedIndividual, a2a:Transport ;
+  rdfs:label "HTTP"@en ; rdfs:comment "The internet road. TLS required beyond the pod."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:NATS a owl:NamedIndividual, a2a:Transport ;
+  rdfs:label "NATS"@en ; rdfs:comment "The intrapod road: request-reply on a2a.<agent>.rpc. Exclusive where configured -- there is no HTTP fallback, and a timeout is nats_unreachable."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:completed a owl:NamedIndividual, a2a:TaskState ;
+  rdfs:label "completed"@en ; rdfs:comment "Delivered, and the CPCP envelope said ok."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:failed a owl:NamedIndividual, a2a:TaskState ;
+  rdfs:label "failed"@en ; rdfs:comment "Delivered, and the grant was refused. A refused grant is still a completed A2A delivery."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:rejected a owl:NamedIndividual, a2a:TaskState ;
+  rdfs:label "rejected"@en ; rdfs:comment "Not delivered: no JSON-LD grant Part, so A2A never called the dispatcher. The one state where an a2a_ reason appears instead of a CPCP one."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+
+# ---- a2a object properties ---------------------------------------------------
+a2a:parts a owl:ObjectProperty ;
+  rdfs:range a2a:Part ;
+  rdfs:label "parts"@en ;
+  rdfs:comment "Domain is a Message or an Artifact, so none is asserted. In v1 the first JSON-LD grant Part wins and the rest are ignored."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:data a owl:ObjectProperty ;
+  rdfs:domain a2a:DataPart ; rdfs:range cpcp:Grant ;
+  rdfs:label "data"@en ;
+  rdfs:comment "The grant itself. A nested JSON-RPC document here, or a JSON object with no @context, is refused a2a_json_not_jsonld -- the retired nest."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:status a owl:ObjectProperty ;
+  rdfs:domain a2a:Task ; rdfs:range a2a:TaskStatus ;
+  rdfs:label "status"@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:state a owl:ObjectProperty ;
+  rdfs:domain a2a:TaskStatus ; rdfs:range a2a:TaskState ;
+  rdfs:label "state"@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:artifacts a owl:ObjectProperty ;
+  rdfs:domain a2a:Task ; rdfs:range a2a:Artifact ;
+  rdfs:label "artifacts"@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:contextId a owl:ObjectProperty ;
+  rdfs:domain a2a:Task ; rdfs:range rdfs:Resource ;
+  rdfs:label "context id"@en ;
+  rdfs:comment "The Message this Task answers. Correlation, not identity."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:preferredTransport a owl:ObjectProperty ;
+  rdfs:domain a2a:AgentCard ; rdfs:range a2a:Transport ;
+  rdfs:label "preferred transport"@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:additionalInterfaces a owl:ObjectProperty ;
+  rdfs:domain a2a:AgentCard ; rdfs:range a2a:Interface ;
+  rdfs:label "additional interfaces"@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:transport a owl:ObjectProperty ;
+  rdfs:domain a2a:Interface ; rdfs:range a2a:Transport ;
+  rdfs:label "transport"@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:url a owl:ObjectProperty ;
+  rdfs:domain a2a:Interface ; rdfs:range rdfs:Resource ;
+  rdfs:label "url"@en ;
+  rdfs:comment "In a pod this is the broker, never http://<role>:<port>. An interface naming an in-pod HTTP path is advertising the surface the bind exists to close."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:skills a owl:ObjectProperty ;
+  rdfs:domain a2a:AgentCard ; rdfs:range a2a:Skill ;
+  rdfs:label "skills"@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:capabilities a owl:ObjectProperty ;
+  rdfs:domain a2a:AgentCard ; rdfs:range a2a:Capabilities ;
+  rdfs:label "capabilities"@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+
+# ---- a2a datatype properties -------------------------------------------------
+a2a:role a owl:DatatypeProperty ;
+  rdfs:domain a2a:Message ; rdfs:range xsd:string ;
+  rdfs:label "role"@en ;
+  rdfs:comment "The A2A conversational role of a Message. Not a CPCP role (FRONT, BACK, BackJob, GRAPH) -- one word, two vocabularies."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:messageId a owl:DatatypeProperty ;
+  rdfs:domain a2a:Message ; rdfs:range xsd:string ;
+  rdfs:label "message id"@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:mediaType a owl:DatatypeProperty ;
+  rdfs:domain a2a:Part ; rdfs:range xsd:string ;
+  rdfs:label "media type"@en ;
+  rdfs:comment "application/ld+json on a grant Part. A Card advertising application/json for the grant is describing the retired nest."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:subject a owl:DatatypeProperty ;
+  rdfs:domain a2a:Interface ; rdfs:range xsd:string ;
+  rdfs:label "subject"@en ;
+  rdfs:comment "The NATS subject: a2a.<agent>.rpc for agent conversations, cpcp.<role>.rpc for grants that are not one."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:protocol a owl:DatatypeProperty ;
+  rdfs:domain a2a:Interface ; rdfs:range xsd:string ;
+  rdfs:label "protocol"@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:defaultInputModes a owl:DatatypeProperty ;
+  rdfs:domain a2a:AgentCard ; rdfs:range xsd:string ;
+  rdfs:label "default input modes"@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:defaultOutputModes a owl:DatatypeProperty ;
+  rdfs:domain a2a:AgentCard ; rdfs:range xsd:string ;
+  rdfs:label "default output modes"@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:name a owl:DatatypeProperty ;
+  rdfs:range xsd:string ;
+  rdfs:label "name"@en ;
+  rdfs:comment "Of an AgentCard or a Skill; no domain asserted."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:description a owl:DatatypeProperty ;
+  rdfs:domain a2a:Skill ; rdfs:range xsd:string ;
+  rdfs:label "description"@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:streaming a owl:DatatypeProperty ;
+  rdfs:domain a2a:Capabilities ; rdfs:range xsd:boolean ;
+  rdfs:label "streaming"@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+a2a:pushNotifications a owl:DatatypeProperty ;
+  rdfs:domain a2a:Capabilities ; rdfs:range xsd:boolean ;
+  rdfs:label "push notifications"@en ;
+  rdfs:comment "An A2A transport capability. Unrelated to cpcp:PUSH, which is a direction of a grant."@en ;
   rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .

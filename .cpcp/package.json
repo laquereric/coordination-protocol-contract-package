@@ -22,11 +22,12 @@
   "ontology": {
     "file": "ontology/cpcp-base.ttl",
     "ontology_iri": "https://w3id.org/cpcp/ontology/base",
-    "version_iri": "https://w3id.org/cpcp/ontology/base/0.1.1",
-    "version": "0.1.1",
-    "prior_version_iri": "https://w3id.org/cpcp/ontology/base/1.0.0",
+    "version_iri": "https://w3id.org/cpcp/ontology/base/0.1.2",
+    "version": "0.1.2",
+    "prior_version_iri": "https://w3id.org/cpcp/ontology/base/0.1.1",
     "term_namespaces": [
       "https://w3id.org/cpcp/ns#",
+      "https://w3id.org/cpcp/osi8/a2a#",
       "https://w3id.org/cpcp/osi8/webmcpld#"
     ],
     "term_namespace": "https://w3id.org/cpcp/ns#",

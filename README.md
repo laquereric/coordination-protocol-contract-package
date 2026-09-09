@@ -169,8 +169,8 @@ appears in this tree.
 ## Ontology
 
 `ontology/cpcp-base.ttl` — the foundation vocabulary: `CID`, `Profile`,
-`Operation` (+ PULL/PUSH), the three ledgers, records, and `Pod`, plus
-the `webmcpld:` binding terms and the `cpcp:Pull` / `cpcp:Push` node
-types the wire had been using without one.
+`Operation` (+ PULL/PUSH), the three ledgers, records, and `Pod`; the
+grant itself (`Grant` → `Context` / `Effect`) with `Result`; and both
+bindings' terms, `a2a:` and `webmcpld:`.
 
 Apache-2.0.
