@@ -97,9 +97,10 @@ Full rules, field tables and a worked example: [repo format](spec/repo-format.md
 A repo that neither serves nor calls carries the index alone.
 
 This repo (the contract home) carries `spec/`, `ontology/`,
-and `PROVENANCE.json` instead of a demo of its own: the demo lives in
-`cpcp_demo` so the contract never depends on example code, and the
-registries live in `cpcp_registry`.
+[`webmcpld/`](webmcpld/) (the same grant in a browser tab, as a
+compatible superset of WebMCP), and `PROVENANCE.json` instead of a demo
+of its own: the demo lives in `cpcp_demo` so the contract never depends
+on example code, and the registries live in `cpcp_registry`.
 
 ## Standing on
 
