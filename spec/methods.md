@@ -20,6 +20,13 @@ All calls are caller-to-seam request/response. There are no push
 notifications, no subscriptions, no callbacks into callers. Async work
 is polled (`projection.latest`), never pushed.
 
+One exception is proposed, and it is narrow: a **channel**
+([`spec/channels.md`](channels.md)), opened by an ordinary PUSH, over an
+append-only log that is also readable by PULL. Everything a channel
+carries is a cache of that PULL or an entry a PUSH could have appended, so
+nothing arrives on it that could not be asked for again. It is not a
+subscription to events; there are still none.
+
 ## Params and result
 
 * `params` is always an object; missing defaults to `{}`. Clients MUST NOT

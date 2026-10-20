@@ -22,3 +22,8 @@ Sources: PROVENANCE.json entry E3 (idempotency store, dispatcher rules).
   store that cannot be read reports `idempotency_not_durable` /
   `idempotency_store_unavailable`; neither fails the call.
 * PULL methods carry no idempotency key and need none.
+* A channel's inbound frame (proposed, [`spec/channels.md`](channels.md))
+  is named by its position: its `operationId` is `channel:<log IRI>:<seq>`,
+  derived and never sent. The same payload at a held `seq` is a replay; a
+  different one is refused (`seq_taken`). The log entry is the receipt,
+  so it lives as long as the log.

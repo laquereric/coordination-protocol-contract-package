@@ -22,8 +22,8 @@
   "ontology": {
     "file": "ontology/cpcp-base.ttl",
     "ontology_iri": "https://w3id.org/cpcp/ontology/base",
-    "version_iri": "https://w3id.org/cpcp/ontology/base/0.1.2",
-    "version": "0.1.2",
+    "version_iri": "https://w3id.org/cpcp/ontology/base/0.1.3",
+    "version": "0.1.3",
     "prior_version_iri": "https://w3id.org/cpcp/ontology/base/0.1.1",
     "term_namespaces": [
       "https://w3id.org/cpcp/ns#",
