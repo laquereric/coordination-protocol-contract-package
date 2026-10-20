@@ -140,7 +140,39 @@ log the caller thinks it fed.
 | `websocket` | log only | everywhere | TCP head-of-line blocking; fine for spectating and LAN play |
 
 A seam lists the roads it offers in its CID. A caller asks for roads in its
-order of preference.
+order of preference. A seam offers a road only while it can carry it; a road
+that is down is not offered, and a caller that also asked for another gets
+that one.
+
+**On a stream road**, the log lane is one bidirectional stream, and a stream
+is a byte stream. Each channel message on it is a minimal LEB128 length,
+then the message. A stream is not seen by its peer until its opener writes,
+and a reader would otherwise never write, so the caller writes a hello
+first. On `quic` the hello names the log and the ticket (`<log> <ticket>`).
+On `webtransport` the URL names them, and the hello is an empty message.
+
+**A road may be a relay.** A process other than the seam may terminate a
+road, provided it decides nothing. It presents the caller's ticket to the
+seam's own channel, the seam admits that connection as it admits any, and
+the relay carries every log frame byte for byte both ways. The seam is then
+still the only one to read, check and append, whatever the road. A relay
+may carry the hint lane itself, since hints are never entries: it fans each
+one out to the log's other connections, and keeps none. It refuses to serve
+a seam whose frame digest differs from its own.
+
+**A hint is one frame.** A hint datagram is exactly one frame of the layout,
+with no position, since it is not an entry. Anything else is dropped. A hint
+is never refused with a close, because the lane is unreliable by design and
+dropping is what it does.
+
+**A road that goes away says so.** A seam or relay that stops closes every
+channel it carries with `road_closed`, so a caller falls back at once. A road
+can still die without a word, and a caller MUST NOT wait on its transport's
+idle timeout (tens of seconds on QUIC) to notice. A proposal unanswered for
+a bound the caller sets (two seconds, say, against a 33 ms tick) means the
+road is lost: the caller closes it and carries on by PULL and PUSH. A relay
+SHOULD also advertise a short idle timeout, since the shorter of the two
+peers' timeouts governs.
 
 ## Evidence
 
@@ -174,3 +206,21 @@ The WebSocket road is built there to this text, log lane only:
   in 3 calls, against 25× in 1,623 calls with a PUSH per tick. An advance
   is proposed, replayed by the host, committed and echoed in 0.28 ms at
   p50 (0.39 ms at p95) on loopback, against a 33 ms tick.
+
+The `webtransport` and `quic` roads are built there as a relay to this
+text, both lanes:
+
+* a native peer writes the log over QUIC and the host checks every advance.
+  A WebSocket reader of the same log sees the same entries. A browser plays
+  and spectates over WebTransport, pinning the relay's certificate by hash;
+* hints fan out to the log's other connections on either road, a hint that
+  is not exactly one frame is dropped, and no hint touches the log;
+* the seam's refusals arrive as the road's own close, reason intact, and a
+  relay that stops closes everything it carries as `road_closed`. A relay
+  killed mid-game is noticed within the caller's bound, and the host still
+  ends where the caller does;
+* an advance round trip through the relay takes 0.4–0.6 ms at p50 on
+  loopback (QUIC, native peer) and 2.3 ms in headless Chromium
+  (WebTransport). Through the reference box's own seam, store and gate it
+  takes 0.53 ms at p50 and 0.77 ms at p95, after an open costing 361 ms,
+  which is the gate's per-admission latency paid once.

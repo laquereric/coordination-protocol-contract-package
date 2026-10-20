@@ -234,6 +234,7 @@ between the runtime and the agent; the workload never sees them.
 | `seq_taken` | an inbound frame at a held `seq` with a different payload | `close` frame | domain | — |
 | `seq_gap` | an inbound frame past the next `seq` the log can take | `close` frame | domain | — |
 | `channel_read_only` | a frame proposed on a ticket that admits reading only | `close` frame | domain | — |
+| `road_closed` | the seam or a relay is going away, or the road broke under the channel | `close` frame, or the caller's own bound on an unanswered proposal | infrastructure | — |
 
 The open's refusals ride the open's envelope, since the open is a PUSH like
 any other. After that there is no envelope. A refusal on the channel is its
