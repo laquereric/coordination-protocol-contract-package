@@ -71,6 +71,15 @@ when the ticket lapses:
   the caller already has or fetches by PULL.
 * The ticket is a bearer for one connection to one log. It is never a
   credential for anything else and never outlives `until`.
+* **The open's receipt never keeps the ticket.** The open is a PUSH, so a
+  repeated `operationId` replays its first result. A replay answers the
+  ticket redacted, and a caller that needs another connection opens again
+  under a new `operationId`. A bearer secret written into a durable
+  receipt would outlive its purpose, and would be copied wherever the
+  receipts are copied.
+* A road with no headers of its own carries the ticket where it can. A
+  browser cannot set headers on a WebSocket, so the ticket travels in the
+  URL's query. It is single-use, so a logged URL cannot be replayed.
 
 ## Frames on the wire
 
@@ -103,10 +112,21 @@ exactly what was accepted. So the receipt-retention question `spec/idempotency.m
 leaves open does not arise for channel frames. A receipt lives as long as
 the log does.
 
+## Who may write
+
+Anyone the open admitted may read. Only a caller the seam names as the
+log's writer may propose entries, for example the creator of a session
+whose clock that caller owns. Any other ticket is read-only, and a frame
+proposed on it closes the channel (`channel_read_only`).
+
 ## Closing
 
 Either side may close. The closer sends a final `close` frame naming a
 reason from the table in `spec/refusals.md` (Channels), and the road ends.
+On a WebSocket, the close frame is the road's own: code 1000 for an
+ordinary close, otherwise 4000 with the reason as its text. A seam's own
+domain reasons for refusing an entry close the channel the same way (for
+example, an input stamped before the log's current tick).
 A malformed frame closes the channel. A seam never skips a frame it could
 not read and carries on, because the log behind it would no longer be the
 log the caller thinks it fed.
@@ -139,5 +159,18 @@ host verification by replay. It measured the problem this answers:
   120 ns per entry, against about 500 ns for JSON plus a shape check, at
   5 bytes against 59 (`spec/frames.md`).
 
-The channel itself is not yet built there; this text is the contract it
-would be built against.
+The WebSocket road is built there to this text, log lane only:
+
+* the open is a gated PUSH answering a one-use ticket, and the receipt
+  keeps the ticket redacted;
+* the log lane carries input entries and the host's advances, `{tick,
+  hash}`, as typed frames (`spec/frames.md`). A writer proposes both. The
+  host replays every advance, and its echo, carrying the host's hash, is
+  the verdict;
+* every refusal in the Channels table closes the channel and is journaled;
+* a caller that loses its channel reads the log by PULL and carries on by
+  PUSH, and the host ends where the caller does;
+* an agent verified on every tick over one channel ran at 153× real time
+  in 3 calls, against 25× in 1,623 calls with a PUSH per tick. An advance
+  is proposed, replayed by the host, committed and echoed in 0.28 ms at
+  p50 (0.39 ms at p95) on loopback, against a 33 ms tick.

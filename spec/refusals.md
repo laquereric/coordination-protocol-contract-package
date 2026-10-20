@@ -160,8 +160,12 @@ seam, where the caller is the only party who could have named the intent.
 | `frame_truncated` | the bytes end inside a frame | `close` frame | http_request | — |
 | `seq_taken` | an inbound frame at a held `seq` with a different payload | `close` frame | domain | — |
 | `seq_gap` | an inbound frame past the next `seq` the log can take | `close` frame | domain | — |
+| `channel_read_only` | a frame proposed on a ticket that admits reading only | `close` frame | domain | — |
 
 The open's refusals ride the open's envelope, since the open is a PUSH like
 any other. After that there is no envelope. A refusal on the channel is its
 `close` frame, and the channel ends with it: a seam never skips a frame it
-could not read and carries on.
+could not read and carries on. A seam's own domain reasons for refusing an
+entry (for example, an input before the log's current tick) close it the
+same way. On a WebSocket the `close` frame is the road's close: code 4000
+with the reason as its text, or 1000 for an ordinary close.
