@@ -147,3 +147,21 @@ that has moved on.
 party to the call and mints the id when the caller omits one
 (`webmcpld/README.md` §4) — the reason stays in the taxonomy for the
 seam, where the caller is the only party who could have named the intent.
+
+### Channels (proposed) — [`spec/channels.md`](channels.md), [`spec/frames.md`](frames.md)
+
+| reason | meaning | carrier | layer | HTTP |
+|---|---|---|---|---|
+| `frame_digest_mismatch` | the open names a frame layout the seam does not speak | CPCP envelope (the open is a PUSH) | domain | 200 |
+| `channel_unavailable` | the seam offers no channel on any road the caller asked for | CPCP envelope (the open is a PUSH) | domain | 200 |
+| `ticket_refused` | a connection presented no ticket, a lapsed one, or one for another log | the road's own refusal at connect (HTTP 401 on WebTransport and WebSocket upgrades) | http_auth | 401 |
+| `unknown_frame` | a frame's tag is not in the layout | `close` frame | http_request | — |
+| `frame_malformed` | a field's bytes are not a value of its kind and bounds; names the field | `close` frame | http_request | — |
+| `frame_truncated` | the bytes end inside a frame | `close` frame | http_request | — |
+| `seq_taken` | an inbound frame at a held `seq` with a different payload | `close` frame | domain | — |
+| `seq_gap` | an inbound frame past the next `seq` the log can take | `close` frame | domain | — |
+
+The open's refusals ride the open's envelope, since the open is a PUSH like
+any other. After that there is no envelope. A refusal on the channel is its
+`close` frame, and the channel ends with it: a seam never skips a frame it
+could not read and carries on.
