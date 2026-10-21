@@ -391,7 +391,12 @@ each, and the host's advance appended from the seats' marks:
   re-opening is briefly without a lane). Against a partner process killed
   outright, it asked 4.5 s after the kill and played the game out on the
   host's hash. Against a partner that was stopped and said its leave, it
-  was never held and never asked.
+  was never held and never asked;
+* agents in a runtime with no QUIC of its own took the `quic` road through
+  the relay's stdio bridge, pinning its certificate by the ticket's hash.
+  Two agents heard each other's held controls on the hint lane and
+  predicted by them. Through a lossy road (10% each way) they ended on the
+  host's hash with every advance agreed.
 
 The sims there are held to every engine their peers use (the section
 above):
