@@ -231,6 +231,23 @@ order of preference. A seam offers a road only while it can carry it; a road
 that is down is not offered, and a caller that also asked for another gets
 that one.
 
+**A road offered is not a road reached.** A seam knows what it can carry,
+not what each caller can reach. A caller that cannot reach the road it was
+given SHOULD pass it over for the next road it asked for, on a ticket of its
+own, and MUST NOT ask for that road again and again. Examples are a name
+that does not resolve where the caller is, no answer on any address, or a
+WebTransport that never comes up. A ticket it never presented admits
+nothing. A road reached and then refused, by a close with a reason, is not
+passed over, because the refusal is the seam's answer on any road.
+
+**A ticket names a relay by name or address.** A caller resolves a name
+and tries each address it has, in the manner of Happy Eyeballs (RFC 8305)
+rather than one at a time. It sends the name as the TLS server name. The
+certificate's hash in the ticket is what the caller trusts, on `quic` as on
+`webtransport`, so the name need not be one a certificate authority vouches
+for. A relay names itself to callers as it is reached from them. That is
+not its bound address when the bound address is the unspecified one.
+
 **On a stream road**, the log lane is one bidirectional stream, and a stream
 is a byte stream. Each channel message on it is a minimal LEB128 length,
 then the message. A stream is not seen by its peer until its opener writes,
@@ -408,7 +425,15 @@ each, and the host's advance appended from the seats' marks:
   as the sim's own frame on its lane and carried it seat-stamped as
   another, both compiled from the shapes and both hint frames. Two agents
   on QUIC, each predicting by the other's hints, ended on the host's hash,
-  and so did a person's page in a 3D view beside an agent.
+  and so did a person's page in a 3D view beside an agent;
+* a relay named `localhost` and bound to 127.0.0.1 was reached by its name.
+  The bridge tried `::1` and then reached 127.0.0.1 in about 270 ms, and
+  the relay heard it ask for the name. Two agents reached it by name, one
+  through a lossy road on another address still asking for the name, and
+  ended on the host's hash. Against a relay named by a name no caller could
+  resolve, agents asking for `quic` and then `websocket` passed `quic` over
+  and played on the WebSocket on the host's hash, never re-opening a lane.
+  A browser page passed WebTransport over the same way.
 
 The sims there are held to every engine their peers use (the section
 above):
