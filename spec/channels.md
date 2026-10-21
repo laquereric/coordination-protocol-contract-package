@@ -396,7 +396,14 @@ each, and the host's advance appended from the seats' marks:
   the relay's stdio bridge, pinning its certificate by the ticket's hash.
   Two agents heard each other's held controls on the hint lane and
   predicted by them. Through a lossy road (10% each way) they ended on the
-  host's hash with every advance agreed.
+  host's hash with every advance agreed;
+* past two writers, a four-seat game played its log with four lanes: four
+  agents on QUIC, each hearing the other three's hints, ended on the host's
+  hash with every advance agreed. A prediction with three remote lanes was
+  rolled back no deeper than 2 ticks. Then one writer was killed outright
+  and one stopped, saying its leave. The killed one was said away by a
+  writer still playing, and the two left played on, the clock on their
+  word. A person's page played beside three agents.
 
 The sims there are held to every engine their peers use (the section
 above):
