@@ -150,6 +150,18 @@ writers gives each one a **lane**:
   prediction window, waiting on the other lanes, has nothing outstanding
   but its last mark, and the silence after it is what tells it that its
   road is gone.
+* **A writer that leaves says so.** A leave is a last mark: the writer is
+  through its tick and writes nothing more until it opens a lane again. It
+  is said in band, so it means the same on every road, however that road
+  closes. The seam answers it as it answers a mark, then closes the
+  channel. While a lane is away the log's clock is the present writers'
+  word, and with every writer away it stands. A writer that opens a lane
+  again is back at the present: through the log's tick, its ticket saying
+  it was away, so an entry it would stamp in the past is refused
+  (`tick_out_of_order`). A lane lost without a leave keeps its writer
+  present and waited on, because it is coming back and the entries it
+  holds may still be in flight. Only the writer says it has gone. The seam
+  needs no timing policy of its own.
 * **One order.** The log interleaves lanes as their entries arrive, so its
   order is not the order a reader applies them in. Every peer applies one
   tick's entries by lane, then in lane order. That order is part of the
@@ -342,6 +354,13 @@ each, and the host's advance appended from the seats' marks:
   answered, 0 alarms). No write waited more than 53% of its bound. The
   bound stayed at the 750 ms floor on a clean road, rose to 0.75–1.1 s
   under 10% loss, and to 1.9–2.8 s at 100 ms a hop.
+* a seat whose browser tab was frozen outright, worker and all, said it
+  left on the page's `freeze` event. The other seat went on 60 ticks in
+  the 2 s it was frozen, against 0 in a control frozen without a leave
+  (held at the 12-tick window). Resumed, the seat opened a lane, caught up
+  from the log and played on. Both ended on the host's hash, every advance
+  agreed. A seat whose tab was closed said it left on `pagehide`, and the
+  other finished the game alone at real time.
 
 The sims there are held to every engine their peers use (the section
 above):
