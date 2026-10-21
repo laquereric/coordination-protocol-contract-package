@@ -143,6 +143,13 @@ writers gives each one a **lane**:
   then the slowest writer's word, and the seam needs no timing policy of its
   own. An advance a writer proposes on its lane is refused
   (`frame_unexpected`): it is the seam's alone.
+* **A mark is answered.** The seam answers every mark it takes, a replay
+  included, to that writer alone: the same frame at the lane's held
+  position, naming the lane's mark. An entry is answered by its echo, so
+  every write then has an answer. A writer that has stopped at its
+  prediction window, waiting on the other lanes, has nothing outstanding
+  but its last mark, and the silence after it is what tells it that its
+  road is gone.
 * **One order.** The log interleaves lanes as their entries arrive, so its
   order is not the order a reader applies them in. Every peer applies one
   tick's entries by lane, then in lane order. That order is part of the
@@ -236,11 +243,14 @@ the newest.
 **A road that goes away says so.** A seam or relay that stops closes every
 channel it carries with `road_closed`, so a caller falls back at once. A road
 can still die without a word, and a caller MUST NOT wait on its transport's
-idle timeout (tens of seconds on QUIC) to notice. A proposal unanswered for
-a bound the caller sets (two seconds, say, against a 33 ms tick) means the
-road is lost: the caller closes it and carries on by PULL and PUSH. A relay
-SHOULD also advertise a short idle timeout, since the shorter of the two
-peers' timeouts governs.
+idle timeout (tens of seconds on QUIC) to notice. A write unanswered for
+a bound the caller sets means the road is lost: the caller closes it and
+carries on by PULL and PUSH. The bound SHOULD scale with the answers the
+caller has seen, for example eight times their smoothed mean, never under
+a floor (750 ms, say, against a 33 ms tick). It SHOULD be a fixed one (two
+seconds, say) until the first answer arrives. A relay SHOULD also
+advertise a short idle timeout, since the shorter of the two peers'
+timeouts governs.
 
 ## Evidence
 
@@ -325,7 +335,13 @@ each, and the host's advance appended from the seats' marks:
   within 12 ticks, so the silent loss took only what it had written in that
   window. The two-second bound then held the game for 2.5–2.7 s, until
   the writer re-opened its lane and resent what the ticket said the seam
-  lacked. The log held the lane exactly as it was written.
+  lacked. The log held the lane exactly as it was written;
+* with marks answered and the scaled bound, the same silent loss held the
+  game 0.84 s. Over the same lossy roads, plus 10% loss at 100 ms each way
+  on each hop, the rule never fired on a live road (about 2,150 writes
+  answered, 0 alarms). No write waited more than 53% of its bound. The
+  bound stayed at the 750 ms floor on a clean road, rose to 0.75–1.1 s
+  under 10% loss, and to 1.9–2.8 s at 100 ms a hop.
 
 The sims there are held to every engine their peers use (the section
 above):
