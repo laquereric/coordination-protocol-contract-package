@@ -37,6 +37,18 @@ lane (`spec/channels.md`). Any other frame sent as a hint is dropped. The
 mark is part of the compiled layout, so it is part of the digest, and peers
 that disagree on which frames may be hints are refused at open.
 
+## Which frames carry whose entries
+
+A seam may carry logs of several kinds, each with its own closed entry shape:
+in the reference seam, three sims, each with its own action shape. A frame
+whose entry names an action shape carries the entries of exactly the kinds
+that shape is declared for. That list is part of the compiled layout, so it
+is part of the digest. A channel's open answers the log's kind, and both
+peers take that kind's frame from the layout rather than agreeing on it
+separately. An entry framed for another kind closes the channel
+(`frame_unexpected`). Adding a kind of log adds shapes, and with them frames.
+It changes no code that reads frames.
+
 ## The layout
 
 | part | encoding |
