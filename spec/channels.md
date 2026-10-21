@@ -403,7 +403,12 @@ each, and the host's advance appended from the seats' marks:
   rolled back no deeper than 2 ticks. Then one writer was killed outright
   and one stopped, saying its leave. The killed one was said away by a
   writer still playing, and the two left played on, the clock on their
-  word. A person's page played beside three agents.
+  word. A person's page played beside three agents;
+* a log whose writers' entries are 3D held controls took a seat's input
+  as the sim's own frame on its lane and carried it seat-stamped as
+  another, both compiled from the shapes and both hint frames. Two agents
+  on QUIC, each predicting by the other's hints, ended on the host's hash,
+  and so did a person's page in a 3D view beside an agent.
 
 The sims there are held to every engine their peers use (the section
 above):
