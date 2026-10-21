@@ -153,6 +153,30 @@ from, and correct itself when the log says otherwise (rollback). That is the
 reader's business. The log never holds a prediction, and the seam's advance
 is what every reader checks itself against.
 
+## What a verified log asks of its sim
+
+An advance is checked by replay. The host and every writer and reader run
+the same sim over the same log and compare hashes, often on different
+engines: a host on one runtime and pages in whatever browser each person
+uses. The check is only as good as the sim's arithmetic. A step that uses
+an operation its language leaves implementation-approximated gives each
+engine a game of its own, and the first unequal advance then reads as a
+cheat or a desync when it is neither.
+
+So a sim whose log a channel verifies by replay MUST compute its state only
+with operations its language defines exactly. In ECMAScript that means:
+
+* integers kept where doubles are exact, or within int32;
+* `Math.imul`, and truncating division of int32 values;
+* `Math.sqrt` (correctly rounded) used only as a guess that integer
+  comparison then corrects.
+
+It MUST NOT use the transcendental functions (`Math.sin`, `exp`, `atan2`,
+`hypot`, `pow` and the rest) in a step. Floating point is free outside the
+step, in a view, a camera or a prediction's display, because nothing
+replays it. A seam SHOULD hold a sim to this by running one corpus of logs
+on every engine it expects its peers to use.
+
 ## Closing
 
 Either side may close. The closer sends a final `close` frame naming a
@@ -277,3 +301,17 @@ each, and the host's advance appended from the seats' marks:
   position from the log;
 * two browser windows co-played over WebTransport with hints, and a wrong
   hint cost a correction and left the log untouched.
+
+The sims there are held to every engine their peers use (the section
+above):
+
+* the same 600 games (about 412,000 ticks played to each game's end) gave
+  equal hashes at every 100 ticks on JavaScriptCore (Bun, and Safari's own
+  build), V8 (Chrome) and SpiderMonkey (Firefox);
+* over the same 20,000 inputs, the three engines' `Math` functions gave
+  different bits for 13 of the 15 tried, by 1–2 ulps, on up to 760 of 2,000
+  inputs (`tan`). Only `sqrt` agreed everywhere, and `pow` did over the
+  inputs tried. A step using any of the 13 would part engines within a
+  game;
+* Firefox played the 3D sim over WebTransport, and the host, on another
+  engine, agreed with every advance.
