@@ -158,8 +158,9 @@ seam, where the caller is the only party who could have named the intent.
 | `unknown_frame` | a frame's tag is not in the layout | `close` frame | http_request | — |
 | `frame_malformed` | a field's bytes are not a value of its kind and bounds; names the field | `close` frame | http_request | — |
 | `frame_truncated` | the bytes end inside a frame | `close` frame | http_request | — |
-| `seq_taken` | an inbound frame at a held `seq` with a different payload | `close` frame | domain | — |
-| `seq_gap` | an inbound frame past the next `seq` the log can take | `close` frame | domain | — |
+| `seq_taken` | an inbound frame at a held `seq` (on a log with several writers, a held position on the writer's lane) with a different payload | `close` frame | domain | — |
+| `seq_gap` | an inbound frame past the next `seq` the log (or the writer's lane) can take | `close` frame | domain | — |
+| `frame_unexpected` | a frame of the layout that this channel does not take inbound, such as an advance a writer proposes on its lane | `close` frame | domain | — |
 | `channel_read_only` | a frame proposed on a ticket that admits reading only | `close` frame | domain | — |
 | `road_closed` | the seam or a relay is going away, or the road broke under the channel | `close` frame, or the caller's own bound on an unanswered proposal | infrastructure | — |
 

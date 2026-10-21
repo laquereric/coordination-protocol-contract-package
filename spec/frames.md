@@ -30,6 +30,13 @@ cpcp:InputEntryShape a sh:NodeShape ;
 `cpcp:frameTag` is 0–255 and unique within a CID. Tags are append-only: a
 tag, once published, always names the same frame.
 
+## Which frames may be hints
+
+A frame shape marked `cpcp:hint true` may travel alone on a channel's hint
+lane (`spec/channels.md`). Any other frame sent as a hint is dropped. The
+mark is part of the compiled layout, so it is part of the digest, and peers
+that disagree on which frames may be hints are refused at open.
+
 ## The layout
 
 | part | encoding |

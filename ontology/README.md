@@ -10,7 +10,7 @@ term below are unchanged by that naming: the letters did not move.
 `PrivateLocalArtifact`), and `Pod`.
 
 - **Ontology IRI:** `https://w3id.org/cpcp/ontology/base` — stable, unversioned
-- **Version IRI:** `https://w3id.org/cpcp/ontology/base/0.1.3`
+- **Version IRI:** `https://w3id.org/cpcp/ontology/base/0.1.4`
 - **Term namespaces:** `https://w3id.org/cpcp/ns#` (`cpcp:`),
   `https://w3id.org/cpcp/osi8/a2a#` (`a2a:`),
   `https://w3id.org/cpcp/osi8/webmcpld#` (`webmcpld:`)
@@ -39,7 +39,8 @@ the stable IRI. Only `owl:versionIRI` and `owl:versionInfo` carry the number.
 
 | Version | |
 |---|---|
-| `0.1.3` | current — channel and frame terms (`Channel`, `ChannelTicket`, `frameTag`, `frameDigest`), for the proposed `spec/channels.md` and `spec/frames.md` |
+| `0.1.4` | current — terms for a log with several writers (`Lane`, `Through`) and hint frames (`hint`), for the proposed `spec/channels.md` and `spec/frames.md` |
+| `0.1.3` | channel and frame terms (`Channel`, `ChannelTicket`, `frameTag`, `frameDigest`), for the proposed `spec/channels.md` and `spec/frames.md` |
 | `0.1.2` | a2a terms, and the grant/result terms adding them surfaced |
 | `0.1.1` | the split, plus the webmcpld terms and `cpcp:Pull` / `cpcp:Push` |
 | `1.0.0` | the unsplit cut, where the ontology IRI *was* the version |
