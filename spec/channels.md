@@ -160,8 +160,18 @@ writers gives each one a **lane**:
   it was away, so an entry it would stamp in the past is refused
   (`tick_out_of_order`). A lane lost without a leave keeps its writer
   present and waited on, because it is coming back and the entries it
-  holds may still be in flight. Only the writer says it has gone. The seam
-  needs no timing policy of its own.
+  holds may still be in flight. The seam needs no timing policy of its own.
+* **A writer gone silent may be said away, by another.** A writer whose
+  process crashed, or whose seam restarted under it, says no leave, and
+  would be waited on for ever. A seam MAY let another writer of the log
+  say it is away, by a PUSH asked of the gate and journaled like any
+  other. It MUST refuse while that writer holds an open lane, because a
+  writer that can still speak says for itself whether it has gone. With
+  its lane closed, nothing it could still say is lost, so the seam needs
+  no timing policy here either. When to ask is the asker's call: a person
+  offered "continue without them" after a while at the window, or an
+  agent's own rule. The writer comes back as it would from a leave, by
+  opening a lane.
 * **One order.** The log interleaves lanes as their entries arrive, so its
   order is not the order a reader applies them in. Every peer applies one
   tick's entries by lane, then in lane order. That order is part of the
@@ -367,7 +377,14 @@ each, and the host's advance appended from the seats' marks:
 * through the reference relay a leave's answer was first lost. The relay
   closed the QUIC connection as soon as it had written the answer, and the
   close discarded it. Finishing the stream and waiting for the caller to
-  close fixed it: the answer, then `ok`.
+  close fixed it: the answer, then `ok`;
+* a seat whose browser renderer crashed said nothing, and its lane closed
+  under it. Its partner, held at the window, was offered "continue without
+  them" 3.9 s after the crash and said it away (`session.seat.away`). The
+  game played out on the host's hash. Saying a seat away was refused
+  (`seat_present`) while its lane was open, and refused for an actor who
+  held no seat. The act was journaled by the gate, and its receipt
+  replays.
 
 The sims there are held to every engine their peers use (the section
 above):
