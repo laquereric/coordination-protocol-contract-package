@@ -226,6 +226,13 @@ dropping is what it does. A hint may name its sender's lane, but nothing
 checks that: a hint only changes what a reader predicts, and a wrong one
 costs that reader a correction, never the log.
 
+**A hint is worth sending twice.** On one connection a datagram sent with a
+stream frame usually travels in the same packet, so a hint sent with its
+entry is lost when the entry is, and is no earlier than the entry's resend.
+A writer SHOULD hint its held control again later, on a later packet. With
+every mark is enough. A repeated hint costs a datagram, and a reader takes
+the newest.
+
 **A road that goes away says so.** A seam or relay that stops closes every
 channel it carries with `road_closed`, so a caller falls back at once. A road
 can still die without a word, and a caller MUST NOT wait on its transport's
@@ -300,7 +307,25 @@ each, and the host's advance appended from the seats' marks:
   writer cannot propose an advance, and a restart rebuilds every lane's
   position from the log;
 * two browser windows co-played over WebTransport with hints, and a wrong
-  hint cost a correction and left the log untouched.
+  hint cost a correction and left the log untouched;
+* under loss, through a lossy road in front of the relay (30 ms each way
+  on each hop, so 60 ms at best from seat to seat), hints earned their
+  keep:
+
+  | loss each way | no hints, p95 | a hint per input | hinted again with every mark |
+  |---|---|---|---|
+  | 0% | 67 ms | 67 ms | 67 ms |
+  | 10% | 292–325 ms | 214–295 ms | 132–214 ms |
+
+  Each figure is how late the other seat knew an input. With one hint per
+  input, when the hint was lost the log was late too (125–196 ms at p50),
+  which is the shared packet above. Every lossy game still ended on the
+  host's hash;
+* a writer whose road died without a word stopped at its prediction window
+  within 12 ticks, so the silent loss took only what it had written in that
+  window. The two-second bound then held the game for 2.5–2.7 s, until
+  the writer re-opened its lane and resent what the ticket said the seam
+  lacked. The log held the lane exactly as it was written.
 
 The sims there are held to every engine their peers use (the section
 above):
