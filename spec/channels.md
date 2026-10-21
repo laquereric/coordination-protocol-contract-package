@@ -294,6 +294,19 @@ seam said before it reach the caller first. On QUIC a connection's close
 discards what the peer has not yet acknowledged, so the relay finishes the
 stream and waits for the caller to close, a few round trips at most.
 
+**A reader looks.** A reader writes nothing, so nothing answers it, and
+the bound above never starts. A reader that has heard nothing for a while
+SHOULD look by PULL at the log's length. The seam's session read names it.
+Entries the seam holds that the road has not brought, and still has not
+after a grace, mean the road is lost. The grace is about twice the look's
+own round trip, because what the seam held when it answered was sent on
+the road before that answer. The reader closes the road as `road_closed`
+and carries on, re-opening from where it got to. A log that has not grown
+is only quiet, and the reader backs off its looks (one second, doubling to
+eight, say). While entries arrive it never looks at all. A caller's attempt
+to reach a relay SHOULD give up in seconds, because a relay that stopped
+without a word may still be offered.
+
 ## Evidence
 
 A reference seam, UC_GameSurface in the IQ monorepo, carries a real-time
@@ -433,7 +446,15 @@ each, and the host's advance appended from the seats' marks:
   ended on the host's hash. Against a relay named by a name no caller could
   resolve, agents asking for `quic` and then `websocket` passed `quic` over
   and played on the WebSocket on the host's hash, never re-opening a lane.
-  A browser page passed WebTransport over the same way.
+  A browser page passed WebTransport over the same way;
+* a reader whose road went deaf looked, found the log past it, and closed
+  the road in 1.24 s. Re-opened from where it got to, it read the whole log
+  with no gap, and its replay reached the host's hash. A healthy reader of
+  the same game never looked while the log moved, and after the game it
+  stayed open through 10 quiet seconds, looking three times. A reader on
+  QUIC whose relay was stopped (SIGSTOP: still offered, answering nothing)
+  closed its road by its look in 1.25 s. It passed the relay over in 3.0 s
+  on re-opening, and read the game out on the WebSocket.
 
 The sims there are held to every engine their peers use (the section
 above):
