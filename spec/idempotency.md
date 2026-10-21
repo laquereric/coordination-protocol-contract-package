@@ -26,4 +26,5 @@ Sources: PROVENANCE.json entry E3 (idempotency store, dispatcher rules).
   is named by its position: its `operationId` is `channel:<log IRI>:<seq>`,
   derived and never sent. The same payload at a held `seq` is a replay; a
   different one is refused (`seq_taken`). The log entry is the receipt,
-  so it lives as long as the log.
+  so it lives as long as the log. On a log with several writers a frame
+  is named by its lane's position, `channel:<log IRI>:<lane>:<n>`.

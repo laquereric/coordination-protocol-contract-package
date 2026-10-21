@@ -114,10 +114,44 @@ the log does.
 
 ## Who may write
 
-Anyone the open admitted may read. Only a caller the seam names as the
-log's writer may propose entries, for example the creator of a session
+Anyone the open admitted may read. Only a caller the seam names as a
+writer of the log may propose entries, for example the creator of a session
 whose clock that caller owns. Any other ticket is read-only, and a frame
 proposed on it closes the channel (`channel_read_only`).
+
+## A log with several writers
+
+Two writers proposing by the log's position would race for every `seq`, and
+whoever lost would be refused for no fault of its own. So a log with several
+writers gives each one a **lane**:
+
+* **A writer proposes by its lane's position.** Its ticket names the lane
+  and where the lane has reached (`lane`: its entries so far). Inbound frames
+  carry that position, not the log's. The seam appends each accepted entry to
+  the log at the log's next `seq`, and the outbound frame carries that `seq`
+  as always. An intent is named `channel:<log IRI>:<lane>:<n>`. Replay,
+  `seq_taken` and `seq_gap` hold per lane.
+* **The seam stamps the lane.** A writer proposes an entry without naming its
+  lane, and the seam records the lane its ticket holds. The entry goes out
+  naming it, so readers know whose it is. No writer can write as another.
+* **A mark is not an entry.** When the log has a clock, a writer says how far
+  it has gone with a mark: every entry it will propose before tick T is
+  already on its lane. The mark carries the lane's current position without
+  taking one. A mark at a held position for a tick already passed is a
+  replay. The seam keeps each lane's mark and appends the clock's advance
+  when every lane is through a tick past the last one. The log's clock is
+  then the slowest writer's word, and the seam needs no timing policy of its
+  own. An advance a writer proposes on its lane is refused
+  (`frame_unexpected`): it is the seam's alone.
+* **One order.** The log interleaves lanes as their entries arrive, so its
+  order is not the order a reader applies them in. Every peer applies one
+  tick's entries by lane, then in lane order. That order is part of the
+  log's contract, and a replay sorts by it.
+
+A reader may run ahead of the log by predicting the lanes it has not heard
+from, and correct itself when the log says otherwise (rollback). That is the
+reader's business. The log never holds a prediction, and the seam's advance
+is what every reader checks itself against.
 
 ## Closing
 
@@ -160,10 +194,13 @@ may carry the hint lane itself, since hints are never entries: it fans each
 one out to the log's other connections, and keeps none. It refuses to serve
 a seam whose frame digest differs from its own.
 
-**A hint is one frame.** A hint datagram is exactly one frame of the layout,
-with no position, since it is not an entry. Anything else is dropped. A hint
+**A hint is one frame.** A hint datagram is exactly one frame of a kind the
+layout marks as a hint (`spec/frames.md`), with no position, since it is not
+an entry. Anything else is dropped, including a mark or an advance. A hint
 is never refused with a close, because the lane is unreliable by design and
-dropping is what it does.
+dropping is what it does. A hint may name its sender's lane, but nothing
+checks that: a hint only changes what a reader predicts, and a wrong one
+costs that reader a correction, never the log.
 
 **A road that goes away says so.** A seam or relay that stops closes every
 channel it carries with `road_closed`, so a caller falls back at once. A road
@@ -224,3 +261,19 @@ text, both lanes:
   (WebTransport). Through the reference box's own seam, store and gate it
   takes 0.53 ms at p50 and 0.77 ms at p95, after an open costing 361 ms,
   which is the gate's per-admission latency paid once.
+
+A log with several writers is built there for co-play: two seats, a lane
+each, and the host's advance appended from the seats' marks:
+
+* each seat runs the sim ahead of the log by prediction and rollback. Over
+  240 ticks at 30 Hz both seats ended on the host's hash, and every advance
+  each checked agreed (80 of 80), at 0, 50 and 250 ms of injected one-way
+  delay. At 250 ms a seat predicted at most 12 ticks ahead and waited
+  beyond that;
+* a spectator replaying the interleaved log by PULL, in the one order,
+  reached the host's hash;
+* the lanes refuse as one log does (`seq_taken`, `seq_gap`, replays), a
+  writer cannot propose an advance, and a restart rebuilds every lane's
+  position from the log;
+* two browser windows co-played over WebTransport with hints, and a wrong
+  hint cost a correction and left the log untouched.
