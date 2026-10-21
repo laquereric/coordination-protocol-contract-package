@@ -385,7 +385,13 @@ each, and the host's advance appended from the seats' marks:
   game played out on the host's hash. Saying a seat away was refused
   (`seat_present`) while its lane was open, and refused for an actor who
   held no seat. The act was journaled by the gate, and its receipt
-  replays.
+  replays;
+* an agent's own rule for when to ask: held at its window 3 s, and the
+  partner's lane gone and not away on two looks a second apart (a writer
+  re-opening is briefly without a lane). Against a partner process killed
+  outright, it asked 4.5 s after the kill and played the game out on the
+  host's hash. Against a partner that was stopped and said its leave, it
+  was never held and never asked.
 
 The sims there are held to every engine their peers use (the section
 above):
