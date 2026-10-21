@@ -248,6 +248,16 @@ certificate's hash in the ticket is what the caller trusts, on `quic` as on
 for. A relay names itself to callers as it is reached from them. That is
 not its bound address when the bound address is the unspecified one.
 
+**A pinned certificate is renewed by announcing it first.** A browser pins
+a self-signed certificate only while it is valid for under 14 days, so a
+road that runs longer renews its certificate. A ticket therefore names a
+list of hashes, and a caller trusts any of them. A relay announces the next
+certificate before serving it, so every ticket issued from then on names
+both. It serves the next certificate only after the longest a ticket lives,
+and then retires the old hash. A ticket issued before the announcement has
+expired by then. One issued after it connects either side of the change.
+Connections already up are not touched.
+
 **On a stream road**, the log lane is one bidirectional stream, and a stream
 is a byte stream. Each channel message on it is a minimal LEB128 length,
 then the message. A stream is not seen by its peer until its opener writes,
@@ -454,7 +464,13 @@ each, and the host's advance appended from the seats' marks:
   stayed open through 10 quiet seconds, looking three times. A reader on
   QUIC whose relay was stopped (SIGSTOP: still offered, answering nothing)
   closed its road by its look in 1.25 s. It passed the relay over in 3.0 s
-  on re-opening, and read the game out on the WebSocket.
+  on re-opening, and read the game out on the WebSocket;
+* a relay renewing every 3 s with a 2 s announcement: tickets issued during
+  the announcement named both hashes and connected after the change, and
+  the old pin alone was refused once it was retired. Two agents on QUIC
+  played 600 ticks through 4 renewals on the host's hash without re-opening
+  a lane. A reader connected before the first heard every message. A
+  browser page's WebTransport connected after a change by the second hash.
 
 The sims there are held to every engine their peers use (the section
 above):
