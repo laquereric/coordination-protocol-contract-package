@@ -353,8 +353,9 @@ each, and the host's advance appended from the seats' marks:
   | 10% | 292–325 ms | 214–295 ms | 132–214 ms |
 
   Each figure is how late the other seat knew an input. With one hint per
-  input, when the hint was lost the log was late too (125–196 ms at p50),
-  which is the shared packet above. Every lossy game still ended on the
+  input, when the hint was lost the log was late too: 88–196 ms at p50
+  over five runs, where independent losses would give about 66. That is
+  the shared packet above. Every lossy game still ended on the
   host's hash;
 * a writer whose road died without a word stopped at its prediction window
   within 12 ticks, so the silent loss took only what it had written in that
