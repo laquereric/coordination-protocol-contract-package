@@ -262,7 +262,10 @@ caller has seen, for example eight times their smoothed mean, never under
 a floor (750 ms, say, against a 33 ms tick). It SHOULD be a fixed one (two
 seconds, say) until the first answer arrives. A relay SHOULD also
 advertise a short idle timeout, since the shorter of the two peers'
-timeouts governs.
+timeouts governs. A relay passing on a seam's clean close MUST let what the
+seam said before it reach the caller first. On QUIC a connection's close
+discards what the peer has not yet acknowledged, so the relay finishes the
+stream and waits for the caller to close, a few round trips at most.
 
 ## Evidence
 
@@ -360,7 +363,11 @@ each, and the host's advance appended from the seats' marks:
   (held at the 12-tick window). Resumed, the seat opened a lane, caught up
   from the log and played on. Both ended on the host's hash, every advance
   agreed. A seat whose tab was closed said it left on `pagehide`, and the
-  other finished the game alone at real time.
+  other finished the game alone at real time;
+* through the reference relay a leave's answer was first lost. The relay
+  closed the QUIC connection as soon as it had written the answer, and the
+  close discarded it. Finishing the stream and waiting for the caller to
+  close fixed it: the answer, then `ok`.
 
 The sims there are held to every engine their peers use (the section
 above):
