@@ -349,6 +349,17 @@ up to the log as it stood at the open. A reader that replays a log with
 several lanes applies each tick's entries in the one order every peer
 uses, never in the order they were logged.
 
+**A lane changes hands.** A writer MAY give its lane up for good, by a
+PUSH of the seam's. From then on the lane is absent, and the log goes on
+the other lanes' word, as for a writer that left. Its next writer takes it
+where it stands: the lane's positions numbered on from the last entry, and
+its earlier entries taken as any writer's, as for a writer taking its lane
+back. A lane the giver still holds open MUST be closed, and a ticket issued
+to the giver before the give MUST admit no further writes. The seam's
+domain reason for both closes is its own. Who holds a lane is appended to
+the store, never changed, so a seam that loads the log reads its last
+holder.
+
 ## Evidence
 
 A reference seam, UC_GameSurface in the IQ monorepo, carries a real-time
