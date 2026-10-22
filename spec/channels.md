@@ -317,6 +317,14 @@ eight, say). While entries arrive it never looks at all. A caller's attempt
 to reach a relay SHOULD give up in seconds, because a relay that stopped
 without a word may still be offered.
 
+**A seam that restarts is waited out.** The log is durable, so a seam
+started again serves the same log from any position. A caller that cannot
+reach the seam treats that as an infrastructure refusal, not an error of
+its own. It asks again, backing off, and re-opens from where it got to.
+Other refusals stay final. A writer held at its window while the seam is
+away MUST NOT take that for its partner's absence. The seam's lane state,
+not the writer's silence, says who is gone.
+
 ## Evidence
 
 A reference seam, UC_GameSurface in the IQ monorepo, carries a real-time
@@ -470,7 +478,14 @@ each, and the host's advance appended from the seats' marks:
   the old pin alone was refused once it was retired. Two agents on QUIC
   played 600 ticks through 4 renewals on the host's hash without re-opening
   a lane. A reader connected before the first heard every message. A
-  browser page's WebTransport connected after a change by the second hash.
+  browser page's WebTransport connected after a change by the second hash;
+* two writers, one on the WebSocket and one on QUIC through the relay, had
+  the seam killed under them twice (1.5 s and 6 s) and started again on its
+  store. Both asked again until it was back and re-opened their lanes. They
+  played the game out on the host's hash, the QUIC writer on QUIC again,
+  and neither said the other away. A reader re-opening from where it got to
+  replayed the whole log to the host's hash, and a person's page with an
+  agent played through a restart the same way.
 
 The sims there are held to every engine their peers use (the section
 above):
