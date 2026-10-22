@@ -340,6 +340,15 @@ over only once that seam no longer answers. A caller follows the refusal
 with the same intent. The log's numbered positions fence every write, so
 two seams that briefly both believe they hold a log can never fork it.
 
+**A writer takes its lane back.** A writer that comes back with nothing
+in memory (a page reloaded, a process restarted) opens its lane as before,
+from the log's start. The log then brings back entries of its own lane
+that this incarnation never made. It MUST take them as it takes any other
+writer's, not as echoes of its own, and MUST NOT write until it has caught
+up to the log as it stood at the open. A reader that replays a log with
+several lanes applies each tick's entries in the one order every peer
+uses, never in the order they were logged.
+
 ## Evidence
 
 A reference seam, UC_GameSurface in the IQ monorepo, carries a real-time
@@ -512,7 +521,13 @@ each, and the host's advance appended from the seats' marks:
   there. With that seam killed, and then with one stopped without a word,
   the writers moved to the other seam. It took the log over and the game
   played out on its hash, the log one entry at every position. The stopped
-  seam, woken, refused the log, naming the seam that held it.
+  seam, woken, refused the log, naming the seam that held it;
+* a browser page reloaded mid-game took its seat back and played the game
+  out on the host's hash with an agent. Before, its fresh engine had taken
+  its own earlier entries for echoes and skipped them, and ended 99
+  advances wrong. An agent killed and started again did the same. A page
+  watching a two-writer log reached the host's hash once it applied each
+  tick's entries in the one order.
 
 The sims there are held to every engine their peers use (the section
 above):
