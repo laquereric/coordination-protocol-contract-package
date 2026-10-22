@@ -325,6 +325,13 @@ Other refusals stay final. A writer held at its window while the seam is
 away MUST NOT take that for its partner's absence. The seam's lane state,
 not the writer's silence, says who is gone.
 
+**A seam whose store is away refuses, and serves no guess.** A write that
+did not land leaves no trace in what the seam serves. While the store
+cannot answer, the seam refuses with `store_refused` (infrastructure) any
+request for a log whose memory it could not bring back to the store's
+word. Other logs are served as before. A caller waits it out as it waits
+out a restart.
+
 ## Evidence
 
 A reference seam, UC_GameSurface in the IQ monorepo, carries a real-time
@@ -485,7 +492,13 @@ each, and the host's advance appended from the seats' marks:
   played the game out on the host's hash, the QUIC writer on QUIC again,
   and neither said the other away. A reader re-opening from where it got to
   replayed the whole log to the host's hash, and a person's page with an
-  agent played through a restart the same way.
+  agent played through a restart the same way;
+* with the seam's store away for 2 s under two writers, a write was refused
+  `store_refused` at once, the log being written answered `store_refused`,
+  and other logs answered as before. With the store back, both writers
+  re-opened their lanes and played the game out on the host's hash. The
+  host's state replayed from the stored inputs, and a reader through the
+  outage had the whole log.
 
 The sims there are held to every engine their peers use (the section
 above):
