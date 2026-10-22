@@ -166,6 +166,18 @@ as they are: `empty_body`, `unparseable_json`, `unknown_operation`,
 (the record store refused the receipt), `server_error`. They carry no HTTP
 status, since the seam is not published over HTTP.
 
+Egress (`sandbox.fetch`, `sandbox.egress.send`) reuses
+`authorization_denied` at `domain` for a target under no producer the
+workload's `dependency` manifest declares (another scheme, host or port,
+a path outside the producer's, a `..` segment, credentials in the URL):
+the admission is refused and nothing is sent. A producer's own answer,
+a 4xx or 5xx included, is the method's result, not a refusal. One seam
+reason is proposed for it:
+
+| reason | meaning | raised by | carrier | layer | HTTP |
+|---|---|---|---|---|---|
+| `mvi_producer_unreachable` | the declared producer did not answer (refused, unresolvable, or silent past the seam's timeout); a send that got no answer leaves no receipt, so its `operationId` is still free | the `sandbox` seam | CPCP envelope on vsock | infrastructure | — |
+
 The reasons below are decided by the runtime before or around a boot,
 or by the guest agent, and never reach the seam's dispatcher:
 
