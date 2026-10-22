@@ -48,6 +48,17 @@ whoever serves it — the same seam, seen from its two ends.
   argument for writing it down rather than leaving it to a compose file.
 * No exposure block: the producer measures its own.
 
+*Proposed — MVI pods (laquereric/iq, UC_Mvi slice 16).* A pod of
+microVMs has no pod network: each workload is in its own VM, and the
+only road between them is the runtime on the host. The producer is
+named `vsock://pod/<name>/_cpcp`, `<name>` being the BACK's
+application name, and none of its operations is the host's own
+(`sandbox.*`, `guest.*`). The runtime's relay admits a call only when
+the FRONT declares it here and the BACK serves it, and hands it on
+with the BACK's own credential in place of the FRONT's, so neither
+holds the other's. The credential this scope holds is therefore the
+FRONT's credential *for the relay*, issued at boot.
+
 ### `pod_internal_services` — served to containers beside this one
 
 * Pod-network traffic between containers, with ports unpublished
@@ -59,6 +70,14 @@ whoever serves it — the same seam, seen from its two ends.
   envelope — designed behavior, not an error path.
 * An `exposure` block here proves the *negative* — that these ports are
   not published — and rule 4 wants that measured like any other claim.
+
+*Proposed — MVI pods.* A BACK in a pod of microVMs serves its seam
+on a road only the runtime holds (a vsock port, or a socket relayed
+out of its VM), never on a network. Its CID marks each operation it
+serves `served: true`, beside the ones it calls. The runtime's
+deployment record lists the seam it relays, with `relayed_to` naming
+the BACK, and its `exposure` cites the launch configs of both VMs and
+the relay's own configuration as evidence (rule 4).
 
 ### `services` — served to callers beyond this pod
 
