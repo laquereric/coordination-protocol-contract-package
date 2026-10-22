@@ -332,6 +332,14 @@ request for a log whose memory it could not bring back to the store's
 word. Other logs are served as before. A caller waits it out as it waits
 out a restart.
 
+**A log has one seam at a time.** Several seams may share one store, but
+a log's writers MUST all reach the same seam, since each seam's clock goes
+on the writers it hears. The store names a log's seam, and a seam that is
+not that seam refuses the log, naming the one that is. It takes the log
+over only once that seam no longer answers. A caller follows the refusal
+with the same intent. The log's numbered positions fence every write, so
+two seams that briefly both believe they hold a log can never fork it.
+
 ## Evidence
 
 A reference seam, UC_GameSurface in the IQ monorepo, carries a real-time
@@ -498,7 +506,13 @@ each, and the host's advance appended from the seats' marks:
   and other logs answered as before. With the store back, both writers
   re-opened their lanes and played the game out on the host's hash. The
   host's state replayed from the stored inputs, and a reader through the
-  outage had the whole log.
+  outage had the whole log;
+* two seams on one store: a writer that joined through the seam not
+  holding the log was sent to the one that did, and the game played out
+  there. With that seam killed, and then with one stopped without a word,
+  the writers moved to the other seam. It took the log over and the game
+  played out on its hash, the log one entry at every position. The stopped
+  seam, woken, refused the log, naming the seam that held it.
 
 The sims there are held to every engine their peers use (the section
 above):
