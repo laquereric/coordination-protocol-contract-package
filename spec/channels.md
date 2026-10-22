@@ -360,6 +360,16 @@ domain reason for both closes is its own. Who holds a lane is appended to
 the store, never changed, so a seam that loads the log reads its last
 holder.
 
+A lane whose writer never comes back would be held for ever, so another
+writer of the log MAY give it up for them, once the lane has been absent,
+with no channel open on it, for a bound the seam sets and says. Before the
+bound, while the lane is present, or for a lane nobody holds, the seam
+MUST refuse, each with a domain reason of its own. The seam MUST count
+that time only from absence it saw itself: a seam that loaded the log
+after a restart holds every lane present until it is said absent again.
+The record of the give names the lane's last writer and the writer who
+gave it up.
+
 ## Evidence
 
 A reference seam, UC_GameSurface in the IQ monorepo, carries a real-time
