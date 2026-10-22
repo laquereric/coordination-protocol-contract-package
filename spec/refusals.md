@@ -191,6 +191,7 @@ or by the guest agent, and never reach the seam's dispatcher:
 | `mvi_pin_unresolved` | a kernel or agent pin names a digest the registry does not hold | runtime | same | infrastructure | — |
 | `mvi_rootfs_verity_mismatch` | the disk's dm-verity tree does not give the signed root hash | runtime, on the host before boot (neither pinned guest kernel has dm-verity; with one, the guest raises it per block) | same | infrastructure | — |
 | `mvi_rootfs_unbuildable` | the rootfs could not be flattened, formatted or given its verity tree | builder | same | infrastructure | — |
+| `mvi_envelope_loosened` | the operator's resource envelope goes past the image's `dev.mvi.resources` (more vCPUs, memory above the ceiling, a longer wall clock, a device the image does not list) or names a knob the image does not bound; the image's envelope may be tightened, never loosened | runtime, before anything is fetched to boot | same | http_request | — |
 | `mvi_isolation_unavailable` | the host cannot meet the image's `isolation.min` (no hypervisor, no backend) | runtime, preflight | same | infrastructure | — |
 | `mvi_arch_unavailable` | no platform, disk or kernel for the host's architecture | runtime, preflight | same | infrastructure | — |
 | `mvi_boot_failed` | the VMM did not boot the disk | runtime | same | infrastructure | — |
