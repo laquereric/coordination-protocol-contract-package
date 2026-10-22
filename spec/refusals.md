@@ -147,3 +147,49 @@ that has moved on.
 party to the call and mints the id when the caller omits one
 (`webmcpld/README.md` §4) — the reason stays in the taxonomy for the
 seam, where the caller is the only party who could have named the intent.
+
+### MVI, a workload in a microVM — proposed
+
+*Proposed, not decided.* Raised by the MVI runtime that boots a workload
+from its OCI image (`laquereric/iq`, `Development/UseCase/UC_Mvi`), and by
+the guest agent inside the VM. The workload reaches its host only over
+vsock: the `sandbox` seam (cpcp_registry `registry/seams.json`) on one
+port, the `guest.*` control plane (`not_a_seam`) on another. Whether
+vsock is a binding of its own, with a README beside `a2a/intrapod/`,
+and which scope it is, are still open, and so is each `failure_layer`
+below.
+
+The `sandbox` seam's own refusals are the seam reasons above, reused
+as they are: `empty_body`, `unparseable_json`, `unknown_operation`,
+`operation_id_required`, `missing_params`, `grounding_refused`,
+`unauthenticated`, `idempotency_not_durable`, `domain_write_refused`
+(the record store refused the receipt), `server_error`. They carry no HTTP
+status, since the seam is not published over HTTP.
+
+The reasons below are decided by the runtime before or around a boot,
+or by the guest agent, and never reach the seam's dispatcher:
+
+| reason | meaning | raised by | carrier | layer | HTTP |
+|---|---|---|---|---|---|
+| `mvi_manifest_nonconformant` | the image's `.cpcp/` grant fails `check-repo-format.py` or the MVI rules, or the image is not shaped as an MVI | runtime, at pull | CPCP envelope at the runtime's caller | http_request | — |
+| `mvi_port_not_declared` | an `ExposedPorts` entry matches no served seam's `exposure` | runtime, at pull | same | http_request | — |
+| `mvi_signature_invalid` | a part the boot would use has no signature by a trusted key, or the tag moved between verification and fetch | runtime, before boot | same | infrastructure | — |
+| `mvi_source_unpinned` | the workload is no revision (outside git, uncommitted changes, no origin), so its provenance would name a rev that is not it | builder | same | http_request | — |
+| `mvi_blob_digest_mismatch` | a fetched blob or manifest does not hash to its digest | runtime | same | infrastructure | — |
+| `mvi_pin_unresolved` | a kernel or agent pin names a digest the registry does not hold | runtime | same | infrastructure | — |
+| `mvi_rootfs_verity_mismatch` | the disk's dm-verity tree does not give the signed root hash | runtime, on the host before boot (neither pinned guest kernel has dm-verity; with one, the guest raises it per block) | same | infrastructure | — |
+| `mvi_rootfs_unbuildable` | the rootfs could not be flattened, formatted or given its verity tree | builder | same | infrastructure | — |
+| `mvi_isolation_unavailable` | the host cannot meet the image's `isolation.min` (no hypervisor, no backend) | runtime, preflight | same | infrastructure | — |
+| `mvi_arch_unavailable` | no platform, disk or kernel for the host's architecture | runtime, preflight | same | infrastructure | — |
+| `mvi_boot_failed` | the VMM did not boot the disk | runtime | same | infrastructure | — |
+| `registry_refused` | the OCI registry refused or did not answer a push or pull | runtime or builder | same | infrastructure | — |
+| `vsock_unreachable` | the peer did not answer on vsock | caller (like `nats_unreachable`) | same | infrastructure | — |
+| `guest_protocol_mismatch` | the guest agent speaks another `guest.*` protocol version | runtime, at `guest.up` | same | infrastructure | — |
+| `guest_process_exists` | `guest.process.start` after the one process this boot allows | guest agent | `guest.*` envelope on vsock | domain | — |
+| `guest_no_process` | `guest.process.signal` with no process running: none started, or it already exited | guest agent | same | domain | — |
+| `guest_spawn_failed` | the entrypoint has no command, or it would not exec | guest agent | same | infrastructure | — |
+
+`mvi_*` reasons are envelopes from the runtime to whoever asked it to
+pull or boot, so a refused boot is data the operator reads, not a
+crashed runtime. `guest_*` reasons are envelopes on the `guest.*` plane
+between the runtime and the agent; the workload never sees them.
