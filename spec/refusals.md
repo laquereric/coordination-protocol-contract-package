@@ -202,6 +202,14 @@ or by the guest agent, and never reach the seam's dispatcher:
 | `guest_no_process` | `guest.process.signal` with no process running: none started, or it already exited | guest agent | same | domain | — |
 | `guest_spawn_failed` | the entrypoint has no command, or it would not exec | guest agent | same | infrastructure | — |
 
+In a pod of microVMs (UC_Mvi slice 16), the runtime's relay between a
+FRONT and its BACK refuses with the seam reasons as they are:
+`empty_body`, `unparseable_json`, `unauthenticated` (not the FRONT's
+relay credential), `unknown_operation` (a method the pod did not
+admit), and `vsock_unreachable` when the BACK does not answer. A pod
+whose FRONT calls what its BACK does not serve is
+`mvi_manifest_nonconformant`, before either boots.
+
 `mvi_*` reasons are envelopes from the runtime to whoever asked it to
 pull or boot, so a refused boot is data the operator reads, not a
 crashed runtime. `guest_*` reasons are envelopes on the `guest.*` plane
