@@ -150,14 +150,20 @@ seam, where the caller is the only party who could have named the intent.
 
 ### MVI, a workload in a microVM, on [`vsock/`](../vsock/README.md) — proposed
 
-*Proposed, not decided, but for the binding.* Raised by the MVI runtime that boots a workload
+*The reasons are proposed; the binding, its scope and each reason's
+`failure_layer` are decided.* Raised by the MVI runtime that boots a workload
 from its OCI image (`laquereric/iq`, `Development/UseCase/UC_Mvi`), and by
 the guest agent inside the VM. The workload reaches its host only over
 vsock: the `sandbox` seam (cpcp_registry `registry/seams.json`) on one
 port, the `guest.*` control plane (`not_a_seam`) on another. vsock is
 a binding of its own ([`vsock/`](../vsock/README.md)), and its scope is
-`pod_internal_*` (decided 2026-10-22). Each `failure_layer` below is
-still open.
+`pod_internal_*` (decided 2026-10-22). Each reason's `failure_layer`
+in the table below is decided too (2026-10-22): `infrastructure` for
+what the runtime, its host, a registry, a kernel or a VM could not do;
+`http_request` for what the request itself was (a manifest, an image, a
+source, an envelope that is not one); `domain` for the guest's process
+state. The MVI runtime's tests hold its code to this table (laquereric/iq
+UC_Mvi `features/layers.feature`).
 
 The `sandbox` seam's own refusals are the seam reasons above, reused
 as they are: `empty_body`, `unparseable_json`, `unknown_operation`,
