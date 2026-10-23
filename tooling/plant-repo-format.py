@@ -65,7 +65,17 @@ VALID_DEPENDENCY = {
 FOUR_DEFS = {"dependency": {"summary": "d"},
              "pod_internal_dependencies": {"summary": "pd"},
              "pod_internal_services": {"summary": "ps"},
+             "pod_internal_library": {"summary": "pl"},
              "services": {"summary": "s"}}
+
+# The in-process scope: served to modules in the same container, so no port and no exposure.
+LIBRARY_INDEX = dict(
+    VALID_INDEX,
+    scopes={"manifests": {"pod_internal_library": ".cpcp/pod_internal_library/package.json"}},
+)
+VALID_LIBRARY = dict({k: v for k, v in VALID_SCOPE.items() if k != "exposure"},
+                     scope="pod_internal_library",
+                     definition="served to modules in this container, as library calls")
 
 
 def build(index=VALID_INDEX, scope=VALID_SCOPE, scope_dir="services", files=()):
@@ -146,6 +156,17 @@ CASES = [
     ("scope-disagrees-with-directory",
      lambda: build(scope=edit(VALID_SCOPE, "scope", "pod_internal_services")),
      "must be the same"),
+
+    # The in-process scope is a scope, and a library seam has no port to claim.
+    ("library-scope-valid",
+     lambda: build(index=LIBRARY_INDEX, scope=VALID_LIBRARY, scope_dir="pod_internal_library"),
+     None),
+
+    ("library-scope-with-exposure",
+     lambda: build(index=LIBRARY_INDEX,
+                   scope=dict(VALID_LIBRARY, exposure=VALID_SCOPE["exposure"]),
+                   scope_dir="pod_internal_library"),
+     "has no port"),
 
     ("scope-kind-wrong",
      lambda: build(scope=edit(VALID_SCOPE, "kind", "cpcp-demo")),
