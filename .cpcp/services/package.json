@@ -43,6 +43,17 @@
       ],
       "refusal": "401/403 plus envelope to an unauthenticated or unallowlisted caller is designed behaviour, not an error path."
     },
+    "pod_internal_library": {
+      "summary": "Served to modules in this container, as library calls.",
+      "direction": "inbound, in-process only",
+      "constraints": [
+        "the same envelope, operationId and refusals, called as a function in the same process",
+        "serving only: the caller is a module in the same container and needs no manifest",
+        "no exposure block: a library seam has no port",
+        "admission happens once, at the container's own seam; a library call is bounded by what the container was admitted to do, and is journaled under its operationId"
+      ],
+      "invariant": "Being in the same container does not make the modules one authority."
+    },
     "services": {
       "summary": "Served to callers beyond this pod.",
       "direction": "inbound, reachable outside the pod",

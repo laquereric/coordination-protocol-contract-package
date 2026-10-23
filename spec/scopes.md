@@ -7,6 +7,7 @@ far**. Both are named, so neither has to be inferred.
 |---|---|---|
 | **beyond the pod** | `dependency` | `services` |
 | **within the pod** | `pod_internal_dependencies` | `pod_internal_services` |
+| **within the container** | (none: the caller is in the same process) | `pod_internal_library` |
 
 The method contract is identical at every scope; reach is not. A seam
 served both inside the pod and beyond it appears in **two** manifests —
@@ -23,7 +24,7 @@ calls a secret-store method beside it is a `pod_internal_dependencies`
 entry even though that same method is a `pod_internal_services` entry of
 whoever serves it — the same seam, seen from its two ends.
 
-## The four scopes
+## The five scopes
 
 ### `dependency` — a CID this repo calls, served elsewhere
 
@@ -59,6 +60,24 @@ whoever serves it — the same seam, seen from its two ends.
   envelope — designed behavior, not an error path.
 * An `exposure` block here proves the *negative* — that these ports are
   not published — and rule 4 wants that measured like any other claim.
+
+### `pod_internal_library` — served to modules in this container, as library calls
+
+* The same envelope, operationId and refusals as every other scope, called
+  as a function in the same process: no road, no port, no credential on a
+  wire. Refusals are still values, never exceptions across the call.
+* Serving only. The caller is a module in the same container and needs no
+  manifest of its own; what it calls is listed here, under `seams`.
+* **No `exposure` block.** A library seam has nothing to publish, and a
+  manifest claiming a port for one has described a different scope.
+* Admission happens once, at the container's own seam (a `services` or
+  `pod_internal_services` entry): what a library call may do is bounded by
+  what the container was admitted to do. A library call is still a CPCP
+  operation, so it is journaled under the operationId it carries.
+* Added 2026-10-23 for units that run several modules behind one seam in
+  one container (IQ's PodContainer). Being in the same container does not
+  make the modules one authority: each keeps its own methods and its own
+  refusals.
 
 ### `services` — served to callers beyond this pod
 

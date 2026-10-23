@@ -48,8 +48,9 @@ LIVENESS = ("required", "advisory")
 #                      calls (outbound)            serves (inbound)
 #   beyond the pod     dependency                  services
 #   within the pod     pod_internal_dependencies   pod_internal_services
+#   in the container   (the caller needs none)     pod_internal_library
 SCOPES = ("dependency", "pod_internal_dependencies",
-          "pod_internal_services", "services")
+          "pod_internal_services", "pod_internal_library", "services")
 
 # The outbound half: entries are CIDs this repo CALLS, and carry depends_on.
 DEPENDENCY_SCOPES = frozenset({"dependency", "pod_internal_dependencies"})
@@ -389,6 +390,10 @@ def check_scope_manifest(repo, scope_dir, rep):
                      % ", ".join(sorted(DEPENDENCY_SCOPES)))
 
         exposure = doc.get("exposure")
+        if scope_dir == "pod_internal_library" and "exposure" in doc:
+            # In-process: there is no port to publish or to prove unpublished.
+            rep.fail(rel, "a pod_internal_library manifest has no 'exposure'; a library seam "
+                          "is called in the same process and has no port")
         if isinstance(exposure, dict) and not str(exposure.get("evidence", "")).strip():
             # Rule 4: read it from the deployment files and record which file.
             rep.fail(rel, "exposure has no 'evidence'; rule 4 says exposure is measured, "
