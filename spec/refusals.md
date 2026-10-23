@@ -155,7 +155,7 @@ seam, where the caller is the only party who could have named the intent.
 from its OCI image (`laquereric/iq`, `Development/UseCase/UC_Mvi`), and by
 the guest agent inside the VM. The workload reaches its host only over
 vsock: the `sandbox` seam (cpcp_registry `registry/seams.json`) on one
-port, the `guest.*` control plane (`not_a_seam`) on another. vsock is
+port, the `guest.*` control plane (`not_a_seam`, decided 2026-10-22: a seam would make the workload's VM serve one, which a FRONT may not) on another. vsock is
 a binding of its own ([`vsock/`](../vsock/README.md)), and its scope is
 `pod_internal_*` (decided 2026-10-22). Each reason's `failure_layer`
 in the table below is decided too (2026-10-22): `infrastructure` for
