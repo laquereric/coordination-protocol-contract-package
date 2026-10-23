@@ -59,7 +59,7 @@ state in its deployment record's `exposure` (repo-format rule 4).
 | vsock port | Direction | Plane | Who has it |
 |---|---|---|---|
 | 7000 | guest → host | the `sandbox` seam | every workload |
-| 7001 | host → guest | the `guest.*` control plane (`not_a_seam`) | every workload's agent |
+| 7001 | host → guest | the `guest.*` control plane (`not_a_seam`, decided) | every workload's agent |
 | 7002 | host → guest | a BACK's own seam | a BACK in a pod |
 | 7003 | guest → host | the pod relay, to the BACK | a FRONT in a pod |
 
