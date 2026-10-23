@@ -9,8 +9,8 @@ A CPCP package repo declares its interface in `.cpcp/`. Machine readers start at
 ```
 
 Scope directory names are the scope names exactly: `dependency`,
-`pod_internal_dependencies`, `pod_internal_services`, `services`
-([scopes](scopes.md)).
+`pod_internal_dependencies`, `pod_internal_services`, `pod_internal_library`,
+`services` ([scopes](scopes.md)).
 
 `.cpcp/<scope>/` says *this repo stands in that relation*. For
 `pod_internal_services` and `services` that means it serves the seams listed. For

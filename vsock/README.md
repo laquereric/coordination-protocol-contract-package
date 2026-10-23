@@ -44,6 +44,8 @@ caller holds a credential the runtime issued at boot. So:
   every call ([scopes](../spec/scopes.md), MVI pods).
 * What the runtime serves the workload, and what a BACK serves its FRONT
   through the relay, are `pod_internal_services`.
+* Nothing on vsock is ever `pod_internal_library` either: that scope is a call in one process, and vsock is a
+  road between two. `pod_internal_*` here means the two scopes above.
 * Nothing on vsock is ever `services`. A workload that should be reached
   from beyond its host is a BACK published by the runtime on another
   binding, never through this one.
