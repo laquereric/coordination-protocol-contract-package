@@ -99,7 +99,8 @@ A repo that neither serves nor calls carries the index alone.
 This repo (the contract home) carries `spec/`, `ontology/`,
 `a2a/` (JSON-RPC frame, JSON-LD payloads: [internet](a2a/internet/) and
 [intrapod](a2a/intrapod/)), [`webmcpld/`](webmcpld/) (the same grant in
-a browser tab, as a compatible superset of WebMCP), and
+a browser tab, as a compatible superset of WebMCP), [`vsock/`](vsock/)
+(the same frames between a microVM and its host), and
 `PROVENANCE.json` instead of a demo of
 its own: the demo lives in `cpcp_demo` so the contract never depends on
 example code, and the registries live in `cpcp_registry`.

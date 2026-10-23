@@ -148,16 +148,16 @@ party to the call and mints the id when the caller omits one
 (`webmcpld/README.md` §4) — the reason stays in the taxonomy for the
 seam, where the caller is the only party who could have named the intent.
 
-### MVI, a workload in a microVM — proposed
+### MVI, a workload in a microVM, on [`vsock/`](../vsock/README.md) — proposed
 
-*Proposed, not decided.* Raised by the MVI runtime that boots a workload
+*Proposed, not decided, but for the binding.* Raised by the MVI runtime that boots a workload
 from its OCI image (`laquereric/iq`, `Development/UseCase/UC_Mvi`), and by
 the guest agent inside the VM. The workload reaches its host only over
 vsock: the `sandbox` seam (cpcp_registry `registry/seams.json`) on one
-port, the `guest.*` control plane (`not_a_seam`) on another. Whether
-vsock is a binding of its own, with a README beside `a2a/intrapod/`,
-and which scope it is, are still open, and so is each `failure_layer`
-below.
+port, the `guest.*` control plane (`not_a_seam`) on another. vsock is
+a binding of its own ([`vsock/`](../vsock/README.md)), and its scope is
+`pod_internal_*` (decided 2026-10-22). Each `failure_layer` below is
+still open.
 
 The `sandbox` seam's own refusals are the seam reasons above, reused
 as they are: `empty_body`, `unparseable_json`, `unknown_operation`,
