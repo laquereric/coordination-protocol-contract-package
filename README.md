@@ -132,6 +132,13 @@ HTTP mapping, idempotency, refusal taxonomy, method conventions, layer
 authority, operation identity, scopes, plus background positioning.
 One-way extraction; the monorepo follows this repo pinned.
 
+Two specs are **proposed** rather than extracted, for grants that need
+latency below what polling gives (a real-time session steered by two
+parties): [channels](spec/channels.md), the one stream CPCP admits, a
+cache of a PULL opened by a PUSH; and [frames](spec/frames.md), closed
+shapes compiled to the one binary layout they admit, so a channel stays
+strongly typed with no shape engine per frame.
+
 ## Implementations
 
 Clients live in [cpcp_demo](https://github.com/laquereric/cpcp_demo)

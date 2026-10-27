@@ -220,3 +220,27 @@ whose FRONT calls what its BACK does not serve is
 pull or boot, so a refused boot is data the operator reads, not a
 crashed runtime. `guest_*` reasons are envelopes on the `guest.*` plane
 between the runtime and the agent; the workload never sees them.
+
+### Channels (proposed) — [`spec/channels.md`](channels.md), [`spec/frames.md`](frames.md)
+
+| reason | meaning | carrier | layer | HTTP |
+|---|---|---|---|---|
+| `frame_digest_mismatch` | the open names a frame layout the seam does not speak | CPCP envelope (the open is a PUSH) | domain | 200 |
+| `channel_unavailable` | the seam offers no channel on any road the caller asked for | CPCP envelope (the open is a PUSH) | domain | 200 |
+| `ticket_refused` | a connection presented no ticket, a lapsed one, or one for another log | the road's own refusal at connect (HTTP 401 on WebTransport and WebSocket upgrades) | http_auth | 401 |
+| `unknown_frame` | a frame's tag is not in the layout | `close` frame | http_request | — |
+| `frame_malformed` | a field's bytes are not a value of its kind and bounds; names the field | `close` frame | http_request | — |
+| `frame_truncated` | the bytes end inside a frame | `close` frame | http_request | — |
+| `seq_taken` | an inbound frame at a held `seq` (on a log with several writers, a held position on the writer's lane) with a different payload | `close` frame | domain | — |
+| `seq_gap` | an inbound frame past the next `seq` the log (or the writer's lane) can take | `close` frame | domain | — |
+| `frame_unexpected` | a frame of the layout that this channel does not take inbound, such as an advance a writer proposes on its lane | `close` frame | domain | — |
+| `channel_read_only` | a frame proposed on a ticket that admits reading only | `close` frame | domain | — |
+| `road_closed` | the seam or a relay is going away, or the road broke under the channel | `close` frame, or the caller's own bound on an unanswered proposal | infrastructure | — |
+
+The open's refusals ride the open's envelope, since the open is a PUSH like
+any other. After that there is no envelope. A refusal on the channel is its
+`close` frame, and the channel ends with it: a seam never skips a frame it
+could not read and carries on. A seam's own domain reasons for refusing an
+entry (for example, an input before the log's current tick) close it the
+same way. On a WebSocket the `close` frame is the road's close: code 4000
+with the reason as its text, or 1000 for an ordinary close.

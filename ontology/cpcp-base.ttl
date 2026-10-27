@@ -14,9 +14,9 @@
 # named by the versionIRI, and only there.
 <https://w3id.org/cpcp/ontology/base>
   a owl:Ontology ;
-  owl:versionIRI <https://w3id.org/cpcp/ontology/base/0.1.2> ;
-  owl:versionInfo "0.1.2" ;
-  owl:priorVersion <https://w3id.org/cpcp/ontology/base/0.1.1> ;
+  owl:versionIRI <https://w3id.org/cpcp/ontology/base/0.1.4> ;
+  owl:versionInfo "0.1.4" ;
+  owl:priorVersion <https://w3id.org/cpcp/ontology/base/0.1.3> ;
   owl:imports <https://w3id.org/json-rpc-ld/ontology/core/1.0.0> ;
   rdfs:label "CPCP base ontology"@en ;
   rdfs:comment "coordination-protocol-contract-package (PubSubStandard_1) foundation: CID, PULL/PUSH operations, the grant and its result, ledgers, canonical records, and pods, plus two bindings -- a2a between agents and webmcpld in a browser tab. Imports JSON-RPC-LD core; PS1-PX profiles import this."@en ;
@@ -179,6 +179,39 @@ cpcp:contentDigest a owl:DatatypeProperty ;
 cpcp:protocolVersion a owl:DatatypeProperty ;
   rdfs:range xsd:string ;
   rdfs:label "protocol version"@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+
+# ---- Channels and frames (proposed: spec/channels.md, spec/frames.md) --------
+cpcp:Channel a owl:Class ;
+  rdfs:label "channel"@en ;
+  rdfs:comment "The one stream CPCP admits: opened by a PUSH over an append-only log that is also readable by PULL. Outbound frames are entries of the log; inbound frames are proposed entries, each a PUSH named by its position. A cache of a PULL, never a subscription."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+cpcp:ChannelTicket a owl:Class ;
+  rdfs:label "channel ticket"@en ;
+  rdfs:comment "What a channel's open answers: the road, the address, and a bearer that admits one connection to one log until it lapses."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+cpcp:frameTag a owl:DatatypeProperty ;
+  rdfs:domain <http://www.w3.org/ns/shacl#NodeShape> ; rdfs:range xsd:unsignedByte ;
+  rdfs:label "frame tag"@en ;
+  rdfs:comment "Marks a closed, required, bounded shape as a frame shape and names its tag (0-255, unique in its CID, append-only). The shape compiles to the one binary layout it admits."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+cpcp:Lane a owl:Class ;
+  rdfs:label "lane"@en ;
+  rdfs:comment "One writer's share of a log with several writers. The writer proposes by the lane's own position; the seam stamps the lane on each entry it appends, and keeps the lane's mark."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+cpcp:Through a owl:Class ;
+  rdfs:label "mark"@en ;
+  rdfs:comment "A writer's word that every entry it will propose before a tick is already on its lane. Not an entry: the seam appends the log's advance when every lane is through a later tick."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+cpcp:hint a owl:DatatypeProperty ;
+  rdfs:domain <http://www.w3.org/ns/shacl#NodeShape> ; rdfs:range xsd:boolean ;
+  rdfs:label "hint"@en ;
+  rdfs:comment "Marks a frame shape as one that may travel alone on a channel's hint lane. Part of the compiled layout, so of the frame digest."@en ;
+  rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
+cpcp:frameDigest a owl:DatatypeProperty ;
+  rdfs:range xsd:string ;
+  rdfs:label "frame digest"@en ;
+  rdfs:comment "sha256 over the canonical JSON of a compiled frame layout. Named by a channel's open; peers that disagree are refused at open, never mid-stream."@en ;
   rdfs:isDefinedBy <https://w3id.org/cpcp/ontology/base> .
 
 # ---- Direction as a type -----------------------------------------------------
