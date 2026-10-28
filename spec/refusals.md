@@ -66,16 +66,15 @@ bounded FIFO).
 plane and is admitted by an IQ gate (`card:game:<method>`). Every reason
 rides HTTP 200 in the envelope; under the `dual-v1` status profile
 `http_request` is sent as 400 and `infrastructure` as 500. The seam's
-admission refusals carry `failure_layer: "authorization"` today, which is not
-one of the four layers; this section proposes `http_auth` for them (marked
-below).
+admission refusals are `http_auth` (decided 2026-10-28; the seam had sent
+`"authorization"`, which is not one of the four layers).
 
 | reason | meaning | layer |
 |---|---|---|
 | `unknown_session` | no session by that id (also a channel's close when the session is gone) | domain |
 | `unknown_sim` | the `sim` named is not in the seam's catalog; `because` lists the known ones | domain |
 | `session_driver_mismatch` | the method needs a host-driven (or a client-driven) session and this one is the other kind | domain |
-| `not_session_owner` | a PUSH only the session's creator may make | http_auth (proposed) |
+| `not_session_owner` | a PUSH only the session's creator may make | http_auth |
 | `tick_out_of_order` | an input batch whose `fromTick` is not the host's tick; on a channel, an entry before the log's tick or past the bound of one advance | domain |
 | `channel_required` | inputs to a co-play session are written only on a seat's lane of a channel | domain |
 | `not_coplay` | a seat method on a one-seat session or sim | domain |
@@ -89,7 +88,7 @@ below).
 | `seat_taken` | inviting someone to a seat another holds | domain |
 | `session_elsewhere` | another live seam holds the session's claim (`because.seam`); ask there. Also closes this seam's channels on a session it has lost | domain |
 | `store_refused` | the data plane did not answer, or refused a PUSH's batch; nothing of the PUSH is kept | infrastructure |
-| `actor_mismatch` | the `operationId`'s receipt belongs to another actor, or the gate admitted the PUSH for a different subject | http_auth (proposed) |
+| `actor_mismatch` | the `operationId`'s receipt belongs to another actor, or the gate admitted the PUSH for a different subject | http_auth |
 | `seam_unreachable` | the gate did not answer, so nothing is admitted | infrastructure |
 | `not_a_websocket` | a channel URL with a valid ticket, but not a WebSocket upgrade (the ticket is consumed); HTTP 400, not an envelope | http_request |
 
