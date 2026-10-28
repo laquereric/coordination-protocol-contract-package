@@ -58,6 +58,62 @@ member), `persist_unauthenticated` (401), `persist_forbidden` (403),
 `invalid_request` (malformed admission), `mind_queue_full` (429,
 bounded FIFO).
 
+## Game (`game.*`, `session.*`) — proposed
+
+*Proposed.* Raised by the game seam (`laquereric/iq`,
+`Development/UseCase/UC_GameSurface`; cpcp_registry `registry/seams.json`, seam
+`game`), which keeps a game session as an append-only input log on a data
+plane and is admitted by an IQ gate (`card:game:<method>`). Every reason
+rides HTTP 200 in the envelope; under the `dual-v1` status profile
+`http_request` is sent as 400 and `infrastructure` as 500. The seam's
+admission refusals are `http_auth` (decided 2026-10-28; the seam had sent
+`"authorization"`, which is not one of the four layers).
+
+| reason | meaning | layer |
+|---|---|---|
+| `unknown_session` | no session by that id (also a channel's close when the session is gone) | domain |
+| `unknown_sim` | the `sim` named is not in the seam's catalog; `because` lists the known ones | domain |
+| `session_driver_mismatch` | the method needs a host-driven (or a client-driven) session and this one is the other kind | domain |
+| `not_session_owner` | a PUSH only the session's creator may make | http_auth |
+| `tick_out_of_order` | an input batch whose `fromTick` is not the host's tick; on a channel, an entry before the log's tick or past the bound of one advance | domain |
+| `channel_required` | inputs to a co-play session are written only on a seat's lane of a channel | domain |
+| `not_coplay` | a seat method on a one-seat session or sim | domain |
+| `already_seated` | the caller (or the invitee) already holds a seat in this game | domain |
+| `seats_full` | no seat is free | domain |
+| `seat_reserved` | free seats remain, but each is kept for an invited player | domain |
+| `not_seated` | only a seat's holder may make this PUSH | domain |
+| `seat_present` | the seat's lane is open, or it has not been said away | domain |
+| `seat_held` | a seat away for less than the seam's release bound cannot be freed by another seat; `because` carries `awayMs` and `releaseMs` | domain |
+| `seat_free` | freeing a seat nobody holds | domain |
+| `seat_taken` | inviting someone to a seat another holds | domain |
+| `session_elsewhere` | another live seam holds the session's claim (`because.seam`); ask there. Also closes this seam's channels on a session it has lost | domain |
+| `store_refused` | the data plane did not answer, or refused a PUSH's batch; nothing of the PUSH is kept | infrastructure |
+| `actor_mismatch` | the `operationId`'s receipt belongs to another actor, or the gate admitted the PUSH for a different subject | http_auth |
+| `seam_unreachable` | the gate did not answer, so nothing is admitted | infrastructure |
+| `not_a_websocket` | a channel URL with a valid ticket, but not a WebSocket upgrade (the ticket is consumed); HTTP 400, not an envelope | http_request |
+
+`seat_given` is a channel **close reason**, not an envelope: the channel's
+writer no longer holds its seat (it gave it up, or it was freed, after its
+ticket was issued). The gate's own refusals (`no_permit`, `out_of_scope`) are
+passed through as the gate sent them. The seam also uses `unauthenticated`
+(from the gate's `/whoami`), `server_error`, `operation_id_required`,
+`grounding_refused`, and the Channels reasons, as specified elsewhere here.
+
+## Shared surface (`surface.*`) — proposed
+
+*Proposed.* The surface contract's methods, answered by a backend that
+translates each into its own method before dispatch, so admission, the
+journal, the receipts and every other refusal are the native method's.
+
+| reason | meaning | layer |
+|---|---|---|
+| `no_such_method` | a `surface.*` name not in the surface contract (the facade's `unknown_operation`) | domain |
+| `not_supported` | in the contract, but this backend has no method for it; a value, never thrown | domain |
+
+A request that does not fit the contract's shape is `grounding_refused`, its
+`because` the contract's message (`unknown param x`, `x is required`, `x must
+be int`).
+
 ## Switch (LLM plane)
 
 `missing_credential` (401, no usable key — same shape whether absent,

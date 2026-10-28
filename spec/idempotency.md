@@ -16,6 +16,16 @@ Sources: PROVENANCE.json entry E3 (idempotency store, dispatcher rules).
   content addressed by digest stays uncorrupted, but the id reads like
   a guarantee it is not making. Production stores are durable (sqlite
   or equivalent); memory stores are explicitly not durable and say so.
+* A receipt lives as long as the effect it records. A PUSH's receipt is
+  kept for as long as the records that PUSH wrote can be read, and is
+  removed only with them, in the same transaction. A receipt retired
+  while its effect remains lets the same `operationId` execute again
+  over a state that already holds it, which is the double write the key
+  exists to prevent. A seam whose records are append-only therefore
+  keeps its receipts for ever; that is not a leak but the rule. Store
+  receipts so that this is cheap: appended one per PUSH, never a file
+  rewritten whole. A channel's receipt is its log entry (below), the
+  same rule.
 * A store that cannot be read yields "not cached": the effect proceeds.
   At worst a retry duplicates, which the digest makes visible. Refusing
   the write instead would let a broken cache take the seam down. A
